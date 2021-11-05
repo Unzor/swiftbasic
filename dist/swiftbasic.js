@@ -1,19 +1,3 @@
-var logger = {};
-console.defaultLog = console.log.bind(console);
-console.logs = [];
-console.log = function(){
-    // default &  console.log()
-    console.defaultLog.apply(console, arguments);
-    // new & array data
-    console.logs.push(Array.from(arguments));
-}
-logger.getLogs=function(){
-  return console.logs;
-}
-logger.clear=function(){
-  console.logs=[];
-}
-
 parcelRequire = function(e, t, n, r) {
     var i, o = "function" == typeof parcelRequire && parcelRequire,
         s = "function" == typeof require && require;
@@ -211,8 +195,8 @@ parcelRequire = function(e, t, n, r) {
             p = new RegExp("^(" + ["LEVEL", "PI"].join("|") + ")\\s*", "i"),
             v = /^([a-z][0-9]*)\$?\s*/i,
             y = /^(\d+(\.\d+)?)\s*/i,
-            m = /^(<>|>=|<=|[,\+\-\*\/%=<>\(\)\]\[])\s*/i,
-            d = /^(AND|OR)\s*/i,
+            d = /^(<>|>=|<=|[,\+\-\*\/%=<>\(\)\]\[])\s*/i,
+            m = /^(AND|OR)\s*/i,
             x = /^(;)\s*/i,
             b = function() {
                 function e(t) {
@@ -272,7 +256,7 @@ parcelRequire = function(e, t, n, r) {
                 }, {
                     key: "eatLogic",
                     value: function() {
-                        var e = this.stmnt.match(d);
+                        var e = this.stmnt.match(m);
                         if (e && e[0]) {
                             var t = e[1].toUpperCase();
                             return this.tokens.push(new u("logic", t)), e[0]
@@ -333,7 +317,7 @@ parcelRequire = function(e, t, n, r) {
                 }, {
                     key: "eatOperation",
                     value: function() {
-                        var e = this.stmnt.match(m);
+                        var e = this.stmnt.match(d);
                         return e && e[0] ? (this.tokens.push(new u("operation", e[1])), e[0]) : null
                     }
                 }, {
@@ -484,7 +468,7 @@ parcelRequire = function(e, t, n, r) {
                     }
                 }]), t
             }(),
-            m = function(e) {
+            d = function(e) {
                 function t(e, n) {
                     var r;
                     return u(this, t), (r = i(this, o(t).call(this, e, "PAUSE"))).expr = n, r
@@ -498,7 +482,7 @@ parcelRequire = function(e, t, n, r) {
                     }
                 }]), t
             }(),
-            d = function(e) {
+            m = function(e) {
                 function t(e, n, r) {
                     var s;
                     return u(this, t), (s = i(this, o(t).call(this, e, "INPUT"))).expr = n, s.variable = r, s
@@ -623,7 +607,7 @@ parcelRequire = function(e, t, n, r) {
                     }
                 }]), t
             }(),
-            R = function(e) {
+            L = function(e) {
                 function t() {
                     return u(this, t), i(this, o(t).apply(this, arguments))
                 }
@@ -634,7 +618,7 @@ parcelRequire = function(e, t, n, r) {
                     }
                 }]), t
             }(),
-            L = function(e) {
+            R = function(e) {
                 function t() {
                     return u(this, t), i(this, o(t).apply(this, arguments))
                 }
@@ -662,8 +646,8 @@ parcelRequire = function(e, t, n, r) {
             GOTO: v,
             LET: y,
             REM: f,
-            PAUSE: m,
-            INPUT: d,
+            PAUSE: d,
+            INPUT: m,
             FOR: x,
             NEXT: b,
             PLOT: k,
@@ -672,8 +656,8 @@ parcelRequire = function(e, t, n, r) {
             GOSUB: E,
             RETURN: T,
             ARRAY: O,
-            CLS: R,
-            CLT: L,
+            CLS: L,
+            CLT: R,
             CLC: C,
             Variable: h
         }
@@ -829,8 +813,8 @@ parcelRequire = function(e, t, n, r) {
             p = s.NEXT,
             v = s.GOTO,
             y = s.END,
-            m = s.IF,
-            d = s.GOSUB,
+            d = s.IF,
+            m = s.GOSUB,
             x = s.RETURN,
             b = s.ARRAY,
             k = s.PLOT,
@@ -839,8 +823,8 @@ parcelRequire = function(e, t, n, r) {
             E = s.CLT,
             T = s.Variable,
             O = e("./expr"),
-            R = e("./errors").ParseError,
-            L = function() {
+            L = e("./errors").ParseError,
+            R = function() {
                 function e(t) {
                     ! function(e, t) {
                         if (!(e instanceof t)) throw new TypeError("Cannot call a class as a function")
@@ -886,10 +870,10 @@ parcelRequire = function(e, t, n, r) {
                             case "IF":
                                 var T, O = this.expectExpr();
                                 this.expectKeyword("THEN"), T = "number" === this.tokenizer.peek().type ? new v(this.lineno, this.expectExpr()) : this.parse();
-                                var L = null;
-                                return this.acceptKeyword("else") && (L = "number" === this.tokenizer.peek().type ? new v(this.lineno, this.expectExpr()) : this.parse()), new m(this.lineno, O, T, L);
+                                var R = null;
+                                return this.acceptKeyword("else") && (R = "number" === this.tokenizer.peek().type ? new v(this.lineno, this.expectExpr()) : this.parse()), new d(this.lineno, O, T, R);
                             case "GOSUB":
-                                return new d(this.lineno, this.expectExpr());
+                                return new m(this.lineno, this.expectExpr());
                             case "RETURN":
                                 return new x(this.lineno);
                             case "ARRAY":
@@ -908,7 +892,7 @@ parcelRequire = function(e, t, n, r) {
                             case "CLT":
                                 return new E(this.lineno)
                         }
-                        throw new R(this.lineno, "Unexpected token ".concat(e.lexeme))
+                        throw new L(this.lineno, "Unexpected token ".concat(e.lexeme))
                     }
                 }, {
                     key: "acceptKeyword",
@@ -919,7 +903,7 @@ parcelRequire = function(e, t, n, r) {
                     key: "expectKeyword",
                     value: function(e) {
                         var t = this.acceptKeyword(e);
-                        if (null == t) throw new R(this.lineno, "Expected ".concat(e, " but got ").concat(this.tokenizer.peek().lexeme));
+                        if (null == t) throw new L(this.lineno, "Expected ".concat(e, " but got ").concat(this.tokenizer.peek().lexeme));
                         return t.lexeme
                     }
                 }, {
@@ -932,7 +916,7 @@ parcelRequire = function(e, t, n, r) {
                     key: "expectOperation",
                     value: function(e) {
                         var t = this.tokenizer.next();
-                        if (this.assertType(t, "operation"), t.lexeme !== e) throw new R(this.lineno, "Expected operation " + e);
+                        if (this.assertType(t, "operation"), t.lexeme !== e) throw new L(this.lineno, "Expected operation " + e);
                         return t.lexeme
                     }
                 }, {
@@ -949,13 +933,13 @@ parcelRequire = function(e, t, n, r) {
                             if (0 === n && ("]" === r.lexeme || ")" === r.lexeme)) break;
                             this.tokenizer.next(), "[" !== r.lexeme && "(" !== r.lexeme || n++, "]" !== r.lexeme && "]" !== r.lexeme || n--, t.push(r)
                         }
-                        if (0 === t.length) throw new R(this.lineno, "Expected expression");
+                        if (0 === t.length) throw new L(this.lineno, "Expected expression");
                         return O(t)
                     }
                 }, {
                     key: "expectLineMod",
                     value: function() {
-                        if (!this.acceptLineMod()) throw new R(this.lineno, "Expected ;");
+                        if (!this.acceptLineMod()) throw new L(this.lineno, "Expected ;");
                         return !0
                     }
                 }, {
@@ -975,18 +959,18 @@ parcelRequire = function(e, t, n, r) {
                     key: "assertType",
                     value: function(e, t) {
                         var n = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : null;
-                        if (e.type !== t) throw new R(this.lineno, "Expected a ".concat(t, " but got a ").concat(e.type, " instead 😕"));
-                        if (null != n && e.lexeme !== n) throw new R(this.lineno, "Expected a ".concat(n, " but got a ").concat(e.lexeme))
+                        if (e.type !== t) throw new L(this.lineno, "Expected a ".concat(t, " but got a ").concat(e.type, " instead 😕"));
+                        if (null != n && e.lexeme !== n) throw new L(this.lineno, "Expected a ".concat(n, " but got a ").concat(e.lexeme))
                     }
                 }, {
                     key: "getLineNo",
                     value: function(e) {
-                        if (this.assertType(e, "lineno"), "number" != typeof e.lexeme) throw new R(this.lineno, "Lines should start with line numbers");
+                        if (this.assertType(e, "lineno"), "number" != typeof e.lexeme) throw new L(this.lineno, "Lines should start with line numbers");
                         return e.lexeme
                     }
                 }]), e
             }();
-        t.exports = L
+        t.exports = R
     }, {
         "./tokenizer": "tokenizer.js",
         "./nodes": "nodes.js",
@@ -1325,7 +1309,7 @@ parcelRequire = function(e, t, n, r) {
             this.fun = e, this.array = t
         }
 
-        function m() {}
+        function d() {}
         o.nextTick = function(e) {
             var t = new Array(arguments.length - 1);
             if (arguments.length > 1)
@@ -1333,7 +1317,7 @@ parcelRequire = function(e, t, n, r) {
             l.push(new y(e, t)), 1 !== l.length || h || a(v)
         }, y.prototype.run = function() {
             this.fun.apply(null, this.array)
-        }, o.title = "browser", o.env = {}, o.argv = [], o.version = "", o.versions = {}, o.on = m, o.addListener = m, o.once = m, o.off = m, o.removeListener = m, o.removeAllListeners = m, o.emit = m, o.prependListener = m, o.prependOnceListener = m, o.listeners = function(e) {
+        }, o.title = "browser", o.env = {}, o.argv = [], o.version = "", o.versions = {}, o.on = d, o.addListener = d, o.once = d, o.off = d, o.removeListener = d, o.removeAllListeners = d, o.emit = d, o.prependListener = d, o.prependOnceListener = d, o.listeners = function(e) {
             return []
         }, o.binding = function(e) {
             throw new Error("process.binding is not supported")
@@ -1351,14 +1335,24 @@ parcelRequire = function(e, t, n, r) {
         "./basic": "basic.js",
         process: "../../home/runner/bundle-repl/node_modules/process/browser.js"
     }]
-}, {}, ["index.js"]), window.Basic.interpret_only_result = function(e) {
-    return new Promise((t, n) => {
+}, {}, ["index.js"]), window.Basic.interpret_only_result = function(e, t) {
+    return new Promise((n, r) => {
         new Basic({
             console: console,
             debugLevel: 99
-        }).run(e), logger.getLogs().forEach(function(e) {
-            var n = e[0];
-            1 == e.length && n.replace(/\s/g, "").length && (t(e), logger.clear())
+        }).run(e).then(() => {
+            logger.getLogs().forEach(function(e) {
+                var n = e[0];
+                1 == e.length && n.replace(/\s/g, "").length && (t(e), logger.clear())
+            })
         })
     })
+};
+var logger = {};
+console.defaultLog = console.log.bind(console), console.logs = [], console.log = function() {
+    console.defaultLog.apply(console, arguments), console.logs.push(Array.from(arguments))
+}, logger.getLogs = function() {
+    return console.logs
+}, logger.clear = function() {
+    console.logs = []
 };
