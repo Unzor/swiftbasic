@@ -1,2145 +1,1348 @@
-// modules are defined as an array
-// [ module function, map of requires ]
-//
-// map of requires is short require name -> numeric require
-//
-// anything defined in a previous bundle is accessed via the
-// orig method which is the require for previous bundles
-parcelRequire = (function (modules, cache, entry, globalName) {
-  // Save the require from previous bundle to this closure if any
-  var previousRequire = typeof parcelRequire === 'function' && parcelRequire;
-  var nodeRequire = typeof require === 'function' && require;
-
-  function newRequire(name, jumped) {
-    if (!cache[name]) {
-      if (!modules[name]) {
-        // if we cannot find the module within our internal map or
-        // cache jump to the current global require ie. the last bundle
-        // that was added to the page.
-        var currentRequire = typeof parcelRequire === 'function' && parcelRequire;
-        if (!jumped && currentRequire) {
-          return currentRequire(name, true);
-        }
-
-        // If there are other bundles on this page the require from the
-        // previous one is saved to 'previousRequire'. Repeat this as
-        // many times as there are bundles until the module is found or
-        // we exhaust the require chain.
-        if (previousRequire) {
-          return previousRequire(name, true);
-        }
-
-        // Try the node require function if it exists.
-        if (nodeRequire && typeof name === 'string') {
-          return nodeRequire(name);
-        }
-
-        var err = new Error('Cannot find module \'' + name + '\'');
-        err.code = 'MODULE_NOT_FOUND';
-        throw err;
-      }
-
-      localRequire.resolve = resolve;
-      localRequire.cache = {};
-
-      var module = cache[name] = new newRequire.Module(name);
-
-      modules[name][0].call(module.exports, localRequire, module, module.exports, this);
-    }
-
-    return cache[name].exports;
-
-    function localRequire(x){
-      return newRequire(localRequire.resolve(x));
-    }
-
-    function resolve(x){
-      return modules[name][1][x] || x;
-    }
-  }
-
-  function Module(moduleName) {
-    this.id = moduleName;
-    this.bundle = newRequire;
-    this.exports = {};
-  }
-
-  newRequire.isParcelRequire = true;
-  newRequire.Module = Module;
-  newRequire.modules = modules;
-  newRequire.cache = cache;
-  newRequire.parent = previousRequire;
-  newRequire.register = function (id, exports) {
-    modules[id] = [function (require, module) {
-      module.exports = exports;
-    }, {}];
-  };
-
-  var error;
-  for (var i = 0; i < entry.length; i++) {
-    try {
-      newRequire(entry[i]);
-    } catch (e) {
-      // Save first error but execute all entries
-      if (!error) {
-        error = e;
-      }
-    }
-  }
-
-  if (entry.length) {
-    // Expose entry point to Node, AMD or browser globals
-    // Based on https://github.com/ForbesLindesay/umd/blob/master/template.js
-    var mainExports = newRequire(entry[entry.length - 1]);
-
-    // CommonJS
-    if (typeof exports === "object" && typeof module !== "undefined") {
-      module.exports = mainExports;
-
-    // RequireJS
-    } else if (typeof define === "function" && define.amd) {
-     define(function () {
-       return mainExports;
-     });
-
-    // <script>
-    } else if (globalName) {
-      this[globalName] = mainExports;
-    }
-  }
-
-  // Override the current require with this new one
-  parcelRequire = newRequire;
-
-  if (error) {
-    // throw error from earlier, _after updating parcelRequire_
-    throw error;
-  }
-
-  return newRequire;
-})({"node_modules/context-eval/lib/context-browser.js":[function(require,module,exports) {
-var global = arguments[3];
-function Context(sandbox, parentElement) {
-  this.iframe = document.createElement('iframe');
-  this.iframe.style.display = 'none';
-  parentElement = parentElement || document.body;
-  parentElement.appendChild(this.iframe);
-  var win = this.iframe.contentWindow;
-  if (sandbox) {
-    this.extend(sandbox);
-  }
-}
-
-Context.prototype.evaluate = function (code) {
-  return this.iframe.contentWindow.eval(code);
-};
-
-Context.prototype.destroy = function () {
-  if (this.iframe) {
-    this.iframe.parentNode.removeChild(this.iframe);
-    this.iframe = null;
-  }
-};
-
-Context.prototype.getGlobal = function () {
-  return this.iframe.contentWindow;
-};
-
-Context.prototype.extend = function (sandbox) {
-  var global = this.getGlobal();
-  Object.keys(sandbox).forEach(function (key) {
-    global[key] = sandbox[key];
-  });
-};
-
-module.exports = Context;
-
-},{}],"functions.js":[function(require,module,exports) {
-var Functions = {
-  // Math:
-  ABS: function ABS(n) {
-    return Math.abs(n);
-  },
-  COS: function COS(n) {
-    return Math.cos(n);
-  },
-  SIN: function SIN(n) {
-    return Math.sin(n);
-  },
-  TAN: function TAN(n) {
-    return Math.tan(n);
-  },
-  EXP: function EXP(n) {
-    return Math.exp(n);
-  },
-  INT: function INT(n) {
-    return Math.floor(n);
-  },
-  FLOOR: function FLOOR(n) {
-    return Math.floor(n);
-  },
-  ROUND: function ROUND(n) {
-    return Math.round(n);
-  },
-  ATN: function ATN(n) {
-    return Math.atan(n);
-  },
-  LOG: function LOG(n) {
-    return Math.log(n);
-  },
-  SGN: function SGN(n) {
-    if (n === 0) return 0;
-    if (n < 0) return -1;
-    return 1;
-  },
-  SQR: function SQR(n) {
-    return Math.sqrt(n);
-  },
-  VAL: function VAL(str) {
-    var n = parseFloat(str);
-    if (isNaN(n)) return 0;
-    return n;
-  },
-  RND: function RND() {
-    var f = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-
-    if (f === 0) {
-      return Math.random();
-    }
-
-    return Math.ceil(Math.random() * f);
-  },
-  // Strings:
-  ASC: function ASC(str) {
-    return str.charCodeAt(0);
-  },
-  LEFT: function LEFT(str, n) {
-    return str.slice(0, n);
-  },
-  MID: function MID(str, start, len) {
-    // len is optional
-    return str.substr(start, len);
-  },
-  RIGHT: function RIGHT(str, n) {
-    return str.slice(n * -1);
-  },
-  CHR: function CHR(n) {
-    return String.fromCharCode(n);
-  },
-  STR: function STR(n) {
-    return String.fromCharCode(n);
-  },
-  LEN: function LEN(str) {
-    return str.length;
-  },
-  SPC: function SPC(n) {
-    return ' '.repeat(n);
-  },
-  // Display stubs
-  COLOR: function COLOR() {
-    // This is just a stub. This gets injected.
-    throw new Error('Unimplemented');
-  },
-  GETCHAR: function GETCHAR() {
-    // This is just a stub. This gets injected.
-    throw new Error('Unimplemented');
-  },
-  UPPERCASE: function UPPERCASE(str) {
-    return str.toUpperCase();
-  },
-  LOWERCASE: function LOWERCASE(str) {
-    return str.toLowerCase();
-  }
-};
-var aliases = {
-  LEFT$: 'LEFT',
-  ATAN: 'ATN',
-  CHR$: 'CHR',
-  MID$: 'MID',
-  RIGHT$: 'RIGHT',
-  RAND: 'RND',
-  // Technically TAB should be relative to the current cursor position
-  // but that's too hard to implement now.
-  TAB: 'SPC'
-};
-
-for (var a in aliases) {
-  Functions[a] = Functions[aliases[a]];
-}
-
-module.exports = Functions;
-},{}],"tokenizer.js":[function(require,module,exports) {
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-var Functions = require('./functions');
-
-var Token =
-/*#__PURE__*/
-function () {
-  function Token(type, lexeme) {
-    _classCallCheck(this, Token);
-
-    this.type = type;
-    this.lexeme = lexeme;
-  }
-
-  _createClass(Token, [{
-    key: "toJSON",
-    value: function toJSON() {
-      return {
-        type: this.type,
-        lexeme: this.lexeme
-      };
-    }
-  }]);
-
-  return Token;
-}();
-
-var eof = new Token('eof', '');
-var KEYWORDS = ['IF', 'THEN', 'ELSE', 'FOR', 'ON', 'TO', 'STEP', 'GOTO', 'GOSUB', 'RETURN', 'NEXT', 'INPUT', 'LET', 'CLC', 'CLT', 'CLS', 'END', 'PRINT', 'PLOT', 'DRAW', 'UNDRAW', 'ARRAY', 'DIM', 'DATA', 'READ', 'REM', 'PAUSE', 'STOP'];
-var CONSTANTS = ['LEVEL', 'PI'];
-var LINE = /^\s*(\d+)\s*/;
-var QUOTE = /^"((\\.|[^"\\])*)"\s*/;
-var KEY = new RegExp('^(' + KEYWORDS.join('|') + ')\\s*', 'i');
-var FUN = new RegExp('^(' + Object.keys(Functions).join('|') + ')\\s*', 'i');
-var CONST = new RegExp('^(' + CONSTANTS.join('|') + ')\\s*', 'i');
-var VAR = /^([a-z][0-9]*)\$?\s*/i;
-var NUM = /^(\d+(\.\d+)?)\s*/i;
-var OP = /^(<>|>=|<=|[,\+\-\*\/%=<>\(\)\]\[])\s*/i;
-var LOGIC = /^(AND|OR)\s*/i;
-var LINEMOD = /^(;)\s*/i;
-
-var Tokenizer =
-/*#__PURE__*/
-function () {
-  _createClass(Tokenizer, null, [{
-    key: "tokenizeLine",
-    value: function tokenizeLine(line) {
-      var t = new Tokenizer(line);
-      t.tokenize();
-      return t.tokens;
-    }
-  }, {
-    key: "expressionTypes",
-    get: function get() {
-      return ['string', 'function', 'operation', 'number', 'variable', 'logic', 'constant'];
-    }
-  }, {
-    key: "eof",
-    get: function get() {
-      return eof;
-    }
-  }]);
-
-  function Tokenizer(stmnt) {
-    _classCallCheck(this, Tokenizer);
-
-    this.stmnt = stmnt;
-    this.tokens = [];
-    this.index = 0;
-    this.tokenized = false;
-  }
-
-  _createClass(Tokenizer, [{
-    key: "assertTokenized",
-    value: function assertTokenized() {
-      if (!this.tokenized) {
-        throw new Error('call tokenize first');
-      }
-    }
-  }, {
-    key: "peek",
-    value: function peek() {
-      var n = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
-      this.assertTokenized();
-      if (this.index >= this.tokens.length) return eof;
-      return this.tokens[this.index + n];
-    }
-  }, {
-    key: "next",
-    value: function next() {
-      this.assertTokenized();
-      if (this.index >= this.tokens.length) return eof;
-      return this.tokens[this.index++];
-    }
-  }, {
-    key: "nextExpr",
-    value: function nextExpr() {
-      this.assertTokenized();
-      var expr = [];
-
-      while (this.index !== this.tokens.length) {
-        if (!Tokenizer.expressionTypes.includes(this.peek().type)) {
-          break;
-        }
-
-        expr.push(this.next());
-      }
-
-      return expr;
-    }
-  }, {
-    key: "tokenize",
-    value: function tokenize() {
-      var linem = this.stmnt.match(LINE);
-
-      if (!linem) {
-        throw new Error("Expected line number");
-      } // First token is always line number.
-
-
-      this.tokens.push(new Token('lineno', parseInt(linem[1])));
-      this.stmnt = this.stmnt.slice(linem[0].length);
-
-      while (this.stmnt.length) {
-        var eaten = this.eatKeyword() || this.eatQuote() || this.eatLogic() || this.eatFunction() || this.eatConstant() || this.eatVariable() || this.eatNumber() || this.eatOperation() || this.eatLineMod();
-
-        if (!eaten) {
-          throw new Error('Invalid syntax near: `' + this.stmnt + "'");
-        }
-
-        this.stmnt = this.stmnt.slice(eaten.length);
-      }
-
-      this.tokenized = true;
-    }
-  }, {
-    key: "eatLogic",
-    value: function eatLogic() {
-      var m = this.stmnt.match(LOGIC);
-
-      if (m && m[0]) {
-        var keyword = m[1].toUpperCase();
-        this.tokens.push(new Token('logic', keyword));
-        return m[0];
-      }
-
-      return null;
-    }
-  }, {
-    key: "eatKeyword",
-    value: function eatKeyword() {
-      var m = this.stmnt.match(KEY);
-
-      if (m && m[0]) {
-        var keyword = m[1].toUpperCase();
-        this.tokens.push(new Token('keyword', keyword)); // If the keyword is a comment then eat it up.
-
-        if (keyword === 'REM') {
-          this.tokens.push(new Token('comment', this.stmnt.slice(m[0].length)));
-          return this.stmnt;
-        }
-
-        return m[0];
-      }
-
-      return null;
-    }
-  }, {
-    key: "eatFunction",
-    value: function eatFunction() {
-      var m = this.stmnt.match(FUN);
-
-      if (m && m[0]) {
-        var fun = m[1].toUpperCase();
-        this.tokens.push(new Token('function', fun));
-        return m[0];
-      }
-
-      return null;
-    }
-  }, {
-    key: "eatConstant",
-    value: function eatConstant() {
-      var m = this.stmnt.match(CONST);
-
-      if (m && m[0]) {
-        var fun = m[1].toUpperCase();
-        this.tokens.push(new Token('constant', fun));
-        return m[0];
-      }
-
-      return null;
-    }
-  }, {
-    key: "eatVariable",
-    value: function eatVariable() {
-      var m = this.stmnt.match(VAR);
-
-      if (m && m[0]) {
-        var variable = m[1].toUpperCase();
-        this.tokens.push(new Token('variable', variable));
-        return m[0];
-      }
-
-      return null;
-    }
-  }, {
-    key: "eatNumber",
-    value: function eatNumber() {
-      var m = this.stmnt.match(NUM);
-
-      if (m && m[0]) {
-        var num = parseFloat(m[1], 10);
-
-        if (isNaN(num)) {
-          throw new Error('Error parsing number:' + m[1]);
-        }
-
-        this.tokens.push(new Token('number', num));
-        return m[0];
-      }
-
-      return null;
-    }
-  }, {
-    key: "eatOperation",
-    value: function eatOperation() {
-      var m = this.stmnt.match(OP);
-
-      if (m && m[0]) {
-        this.tokens.push(new Token('operation', m[1]));
-        return m[0];
-      }
-
-      return null;
-    }
-  }, {
-    key: "eatQuote",
-    value: function eatQuote() {
-      var m = this.stmnt.match(QUOTE);
-
-      if (m && m[0]) {
-        this.tokens.push(new Token('string', "\"".concat(m[1], "\"")));
-        return m[0];
-      }
-
-      return null;
-    }
-  }, {
-    key: "eatLineMod",
-    value: function eatLineMod() {
-      var m = this.stmnt.match(LINEMOD);
-
-      if (m && m[0]) {
-        this.tokens.push(new Token('linemod', "\"".concat(m[1], "\"")));
-        return m[0];
-      }
-
-      return null;
-    }
-  }]);
-
-  return Tokenizer;
-}();
-
-module.exports = Tokenizer;
-},{"./functions":"functions.js"}],"nodes.js":[function(require,module,exports) {
-function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-var Node =
-/*#__PURE__*/
-function () {
-  function Node(lineno, type) {
-    _classCallCheck(this, Node);
-
-    this.lineno = lineno;
-    this.type = type;
-  }
-
-  _createClass(Node, [{
-    key: "toJSON",
-    value: function toJSON() {
-      var _this = this;
-
-      var ret = {};
-      Object.keys(this).forEach(function (k) {
-        ret[k] = _this[k];
-      });
-      return ret;
-    }
-  }, {
-    key: "assert",
-    value: function assert(truth, message) {
-      if (!truth) {
-        // Todo custom error type
-        throw new Error("Line ".concat(this.lineno, ": ").concat(message));
-      }
-    }
-  }]);
-
-  return Node;
-}();
-
-var Variable =
-/*#__PURE__*/
-function (_Node) {
-  _inherits(Variable, _Node);
-
-  function Variable(lineno, name, subscript) {
-    var _this2;
-
-    _classCallCheck(this, Variable);
-
-    _this2 = _possibleConstructorReturn(this, _getPrototypeOf(Variable).call(this, lineno, 'variable'));
-    _this2.name = name;
-
-    if (subscript == null) {
-      _this2.array = false;
-    } else {
-      _this2.array = true;
-      _this2.subscript = subscript;
-    }
-
-    return _this2;
-  }
-
-  return Variable;
-}(Node);
-
-var REM =
-/*#__PURE__*/
-function (_Node2) {
-  _inherits(REM, _Node2);
-
-  function REM(lineno, comment) {
-    var _this3;
-
-    _classCallCheck(this, REM);
-
-    _this3 = _possibleConstructorReturn(this, _getPrototypeOf(REM).call(this, lineno, 'REM'));
-    _this3.comment = comment;
-    return _this3;
-  }
-
-  _createClass(REM, [{
-    key: "run",
-    value: function run() {// noop
-    }
-  }]);
-
-  return REM;
-}(Node);
-
-var PRINT =
-/*#__PURE__*/
-function (_Node3) {
-  _inherits(PRINT, _Node3);
-
-  function PRINT(lineno, expr, linemod) {
-    var _this4;
-
-    _classCallCheck(this, PRINT);
-
-    _this4 = _possibleConstructorReturn(this, _getPrototypeOf(PRINT).call(this, lineno, 'PRINT'));
-    _this4.expr = expr;
-    _this4.newline = !linemod;
-    return _this4;
-  }
-
-  _createClass(PRINT, [{
-    key: "run",
-    value: function run(context) {
-      var value = context.evaluate(this.expr);
-      context.print(value);
-
-      if (this.newline) {
-        context.print("\n");
-      }
-    }
-  }]);
-
-  return PRINT;
-}(Node);
-
-var GOTO =
-/*#__PURE__*/
-function (_Node4) {
-  _inherits(GOTO, _Node4);
-
-  function GOTO(lineno, expr) {
-    var _this5;
-
-    _classCallCheck(this, GOTO);
-
-    _this5 = _possibleConstructorReturn(this, _getPrototypeOf(GOTO).call(this, lineno, 'GOTO'));
-    _this5.expr = expr;
-    return _this5;
-  }
-
-  _createClass(GOTO, [{
-    key: "run",
-    value: function run(context) {
-      var targetno = context.evaluate(this.expr);
-      this.assert(typeof targetno === 'number', 'Expected GOTO `expr` to evaluate to a number');
-      context.goto(targetno);
-    }
-  }]);
-
-  return GOTO;
-}(Node);
-
-var LET =
-/*#__PURE__*/
-function (_Node5) {
-  _inherits(LET, _Node5);
-
-  function LET(lineno, variable, expr) {
-    var _this6;
-
-    _classCallCheck(this, LET);
-
-    _this6 = _possibleConstructorReturn(this, _getPrototypeOf(LET).call(this, lineno, 'LET'));
-    _this6.variable = variable;
-    _this6.expr = expr;
-    return _this6;
-  }
-
-  _createClass(LET, [{
-    key: "run",
-    value: function run(context) {
-      var value = context.evaluate(this.expr);
-
-      if (this.variable.array) {
-        var sub = context.evaluate(this.variable.subscript);
-        context.setArray(this.variable.name, sub, value);
-      } else {
-        context.set(this.variable.name, value);
-      }
-    }
-  }]);
-
-  return LET;
-}(Node);
-
-var PAUSE =
-/*#__PURE__*/
-function (_Node6) {
-  _inherits(PAUSE, _Node6);
-
-  function PAUSE(lineno, expr) {
-    var _this7;
-
-    _classCallCheck(this, PAUSE);
-
-    _this7 = _possibleConstructorReturn(this, _getPrototypeOf(PAUSE).call(this, lineno, 'PAUSE'));
-    _this7.expr = expr;
-    return _this7;
-  }
-
-  _createClass(PAUSE, [{
-    key: "run",
-    value: function run(context) {
-      var value = context.evaluate(this.expr);
-
-      if (typeof value !== 'number') {
-        throw new Error('Expected pause value to be a number');
-      }
-
-      context.pause(value);
-    }
-  }]);
-
-  return PAUSE;
-}(Node);
-
-var INPUT =
-/*#__PURE__*/
-function (_Node7) {
-  _inherits(INPUT, _Node7);
-
-  function INPUT(lineno, expr, variable) {
-    var _this8;
-
-    _classCallCheck(this, INPUT);
-
-    _this8 = _possibleConstructorReturn(this, _getPrototypeOf(INPUT).call(this, lineno, 'INPUT'));
-    _this8.expr = expr;
-    _this8.variable = variable;
-    return _this8;
-  }
-
-  _createClass(INPUT, [{
-    key: "run",
-    value: function run(context) {
-      var _this9 = this;
-
-      var prompt = context.evaluate(this.expr);
-      context.print(prompt); // Yield.
-
-      context.halt();
-      context.input(function (value) {
-        if (_this9.variable.array) {
-          var sub = context.evaluate(_this9.variable.subscript);
-          context.setArray(_this9.variable.name, sub, value);
-        } else {
-          context.set(_this9.variable.name, value);
-        } // Resume.
-
-
-        context.execute();
-      });
-    }
-  }]);
-
-  return INPUT;
-}(Node);
-
-var FOR =
-/*#__PURE__*/
-function (_Node8) {
-  _inherits(FOR, _Node8);
-
-  function FOR(lineno, variable, left, right, step) {
-    var _this10;
-
-    _classCallCheck(this, FOR);
-
-    _this10 = _possibleConstructorReturn(this, _getPrototypeOf(FOR).call(this, lineno, 'FOR'));
-    _this10.lineno = lineno;
-    _this10.variable = variable;
-    _this10.left = left;
-    _this10.right = right;
-    _this10.step = step;
-    return _this10;
-  }
-
-  _createClass(FOR, [{
-    key: "run",
-    value: function run(context) {
-      var value = context.evaluate(this.left);
-      var max = context.evaluate(this.right);
-      var increment = this.step ? context.evaluate(this.step) : 1;
-
-      if (this.variable.array) {
-        throw new Error('Cannot use variables in for');
-      }
-
-      context.loopStart({
-        variable: this.variable.name,
-        value: value,
-        max: max,
-        increment: increment
-      });
-    }
-  }]);
-
-  return FOR;
-}(Node);
-
-var NEXT =
-/*#__PURE__*/
-function (_Node9) {
-  _inherits(NEXT, _Node9);
-
-  function NEXT(lineno, variable) {
-    var _this11;
-
-    _classCallCheck(this, NEXT);
-
-    _this11 = _possibleConstructorReturn(this, _getPrototypeOf(NEXT).call(this, lineno, 'NEXT'));
-    _this11.variable = variable;
-    return _this11;
-  }
-
-  _createClass(NEXT, [{
-    key: "run",
-    value: function run(context) {
-      context.loopJump(this.variable.name);
-    }
-  }]);
-
-  return NEXT;
-}(Node);
-
-var PLOT =
-/*#__PURE__*/
-function (_Node10) {
-  _inherits(PLOT, _Node10);
-
-  function PLOT(lineno, x, y) {
-    var _this12;
-
-    var color = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : "black";
-
-    _classCallCheck(this, PLOT);
-
-    _this12 = _possibleConstructorReturn(this, _getPrototypeOf(PLOT).call(this, lineno, 'PLOT'));
-    _this12.x = x;
-    _this12.y = y;
-    _this12.color = color;
-    return _this12;
-  }
-
-  _createClass(PLOT, [{
-    key: "run",
-    value: function run(context) {
-      context.plot(context.evaluate(this.x), context.evaluate(this.y), context.evaluate(this.color));
-    }
-  }]);
-
-  return PLOT;
-}(Node);
-
-var END =
-/*#__PURE__*/
-function (_Node11) {
-  _inherits(END, _Node11);
-
-  function END() {
-    _classCallCheck(this, END);
-
-    return _possibleConstructorReturn(this, _getPrototypeOf(END).apply(this, arguments));
-  }
-
-  _createClass(END, [{
-    key: "run",
-    value: function run(context) {
-      context.end();
-    }
-  }]);
-
-  return END;
-}(Node);
-
-var IF =
-/*#__PURE__*/
-function (_Node12) {
-  _inherits(IF, _Node12);
-
-  function IF(lineno, condition, then, elze) {
-    var _this13;
-
-    _classCallCheck(this, IF);
-
-    _this13 = _possibleConstructorReturn(this, _getPrototypeOf(IF).call(this, lineno, 'IF'));
-    _this13.condition = condition;
-    _this13.then = then;
-    _this13.elze = elze;
-    return _this13;
-  }
-
-  _createClass(IF, [{
-    key: "run",
-    value: function run(context) {
-      if (context.evaluate(this.condition)) {
-        this.then.run(context);
-      } else if (this.other) {
-        this.elze.run(context);
-      }
-    }
-  }]);
-
-  return IF;
-}(Node);
-
-var GOSUB =
-/*#__PURE__*/
-function (_Node13) {
-  _inherits(GOSUB, _Node13);
-
-  function GOSUB(lineno, expr) {
-    var _this14;
-
-    _classCallCheck(this, GOSUB);
-
-    _this14 = _possibleConstructorReturn(this, _getPrototypeOf(GOSUB).call(this, lineno, 'GOSUB'));
-    _this14.expr = expr;
-    return _this14;
-  }
-
-  _createClass(GOSUB, [{
-    key: "run",
-    value: function run(context) {
-      var lineno = context.evaluate(this.expr);
-
-      if (typeof lineno !== 'number') {
-        throw new Error('Expected GOSUB argument to be a number');
-      }
-
-      context.gosub(lineno);
-    }
-  }]);
-
-  return GOSUB;
-}(Node);
-
-var RETURN =
-/*#__PURE__*/
-function (_Node14) {
-  _inherits(RETURN, _Node14);
-
-  function RETURN() {
-    _classCallCheck(this, RETURN);
-
-    return _possibleConstructorReturn(this, _getPrototypeOf(RETURN).apply(this, arguments));
-  }
-
-  _createClass(RETURN, [{
-    key: "run",
-    value: function run(context) {
-      context.return();
-    }
-  }]);
-
-  return RETURN;
-}(Node);
-
-var ARRAY =
-/*#__PURE__*/
-function (_Node15) {
-  _inherits(ARRAY, _Node15);
-
-  function ARRAY(lineno, variable) {
-    var _this15;
-
-    _classCallCheck(this, ARRAY);
-
-    _this15 = _possibleConstructorReturn(this, _getPrototypeOf(ARRAY).call(this, lineno, 'ARRAY'));
-    _this15.variable = variable;
-    return _this15;
-  }
-
-  _createClass(ARRAY, [{
-    key: "run",
-    value: function run(context) {
-      context.array(this.variable.name);
-    }
-  }]);
-
-  return ARRAY;
-}(Node);
-
-var CLS =
-/*#__PURE__*/
-function (_Node16) {
-  _inherits(CLS, _Node16);
-
-  function CLS() {
-    _classCallCheck(this, CLS);
-
-    return _possibleConstructorReturn(this, _getPrototypeOf(CLS).apply(this, arguments));
-  }
-
-  _createClass(CLS, [{
-    key: "run",
-    value: function run(context) {
-      context.clearAll();
-    }
-  }]);
-
-  return CLS;
-}(Node);
-
-var CLT =
-/*#__PURE__*/
-function (_Node17) {
-  _inherits(CLT, _Node17);
-
-  function CLT() {
-    _classCallCheck(this, CLT);
-
-    return _possibleConstructorReturn(this, _getPrototypeOf(CLT).apply(this, arguments));
-  }
-
-  _createClass(CLT, [{
-    key: "run",
-    value: function run(context) {
-      context.clearConsole();
-    }
-  }]);
-
-  return CLT;
-}(Node);
-
-var CLC =
-/*#__PURE__*/
-function (_Node18) {
-  _inherits(CLC, _Node18);
-
-  function CLC() {
-    _classCallCheck(this, CLC);
-
-    return _possibleConstructorReturn(this, _getPrototypeOf(CLC).apply(this, arguments));
-  }
-
-  _createClass(CLC, [{
-    key: "run",
-    value: function run(context) {
-      context.clearGraphics();
-    }
-  }]);
-
-  return CLC;
-}(Node);
-
-module.exports = {
-  Node: Node,
-  PRINT: PRINT,
-  GOTO: GOTO,
-  LET: LET,
-  REM: REM,
-  PAUSE: PAUSE,
-  INPUT: INPUT,
-  FOR: FOR,
-  NEXT: NEXT,
-  PLOT: PLOT,
-  END: END,
-  IF: IF,
-  GOSUB: GOSUB,
-  RETURN: RETURN,
-  ARRAY: ARRAY,
-  CLS: CLS,
-  CLT: CLT,
-  CLC: CLC,
-  Variable: Variable
-};
-},{}],"expr.js":[function(require,module,exports) {
-function exprToJS(expr) {
-  var jsExpr = '';
-
-  while (expr.length) {
-    var t = expr.shift();
-
-    if (t.type === 'variable') {
-      jsExpr += '__pgb.get("' + t.lexeme + '")';
-      continue;
-    }
-
-    if (t.type === 'function') {
-      jsExpr += '__pgb.fun("' + t.lexeme + '")';
-      continue;
-    }
-
-    if (t.type === 'constant') {
-      jsExpr += '__pgb.getConst("' + t.lexeme + '")';
-      continue;
-    }
-
-    if (t.type === 'logic') {
-      if (t.lexeme === 'AND') {
-        jsExpr += '&&';
-      } else if (t.lexeme === 'OR') {
-        jsExpr += '||';
-      }
-
-      continue;
-    }
-
-    if (t.type === 'operation') {
-      if (t.lexeme === '<>') {
-        jsExpr += '!=';
-        continue;
-      }
-
-      if (t.lexeme === '=') {
-        jsExpr += '==';
-        continue;
-      }
-    }
-
-    jsExpr += t.lexeme;
-  }
-
-  return jsExpr;
-}
-
-module.exports = exprToJS;
-},{}],"errors.js":[function(require,module,exports) {
-function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
-
-function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
-
-function _wrapNativeSuper(Class) { var _cache = typeof Map === "function" ? new Map() : undefined; _wrapNativeSuper = function _wrapNativeSuper(Class) { if (Class === null || !_isNativeFunction(Class)) return Class; if (typeof Class !== "function") { throw new TypeError("Super expression must either be null or a function"); } if (typeof _cache !== "undefined") { if (_cache.has(Class)) return _cache.get(Class); _cache.set(Class, Wrapper); } function Wrapper() { return _construct(Class, arguments, _getPrototypeOf(this).constructor); } Wrapper.prototype = Object.create(Class.prototype, { constructor: { value: Wrapper, enumerable: false, writable: true, configurable: true } }); return _setPrototypeOf(Wrapper, Class); }; return _wrapNativeSuper(Class); }
-
-function isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
-
-function _construct(Parent, args, Class) { if (isNativeReflectConstruct()) { _construct = Reflect.construct; } else { _construct = function _construct(Parent, args, Class) { var a = [null]; a.push.apply(a, args); var Constructor = Function.bind.apply(Parent, a); var instance = new Constructor(); if (Class) _setPrototypeOf(instance, Class.prototype); return instance; }; } return _construct.apply(null, arguments); }
-
-function _isNativeFunction(fn) { return Function.toString.call(fn).indexOf("[native code]") !== -1; }
-
-function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
-
-function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-
-var ParseError =
-/*#__PURE__*/
-function (_Error) {
-  _inherits(ParseError, _Error);
-
-  function ParseError(lineno, message) {
-    var _this;
-
-    _classCallCheck(this, ParseError);
-
-    _this = _possibleConstructorReturn(this, _getPrototypeOf(ParseError).call(this));
-    _this.message = "Parse error on line ".concat(lineno, ": ").concat(message);
-    _this.name = 'ParseError';
-    return _this;
-  }
-
-  return ParseError;
-}(_wrapNativeSuper(Error));
-
-var RuntimeError =
-/*#__PURE__*/
-function (_Error2) {
-  _inherits(RuntimeError, _Error2);
-
-  function RuntimeError(lineno, message) {
-    var _this2;
-
-    _classCallCheck(this, RuntimeError);
-
-    _this2 = _possibleConstructorReturn(this, _getPrototypeOf(RuntimeError).call(this));
-    _this2.message = "Error on line ".concat(lineno, ": ").concat(message);
-    _this2.name = 'RuntimeError';
-    return _this2;
-  }
-
-  return RuntimeError;
-}(_wrapNativeSuper(Error));
-
-module.exports = {
-  ParseError: ParseError,
-  RuntimeError: RuntimeError
-};
-},{}],"parser.js":[function(require,module,exports) {
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-var Tokenizer = require('./tokenizer');
-
-var _require = require('./nodes'),
-    PRINT = _require.PRINT,
-    LET = _require.LET,
-    REM = _require.REM,
-    PAUSE = _require.PAUSE,
-    INPUT = _require.INPUT,
-    FOR = _require.FOR,
-    NEXT = _require.NEXT,
-    GOTO = _require.GOTO,
-    END = _require.END,
-    IF = _require.IF,
-    GOSUB = _require.GOSUB,
-    RETURN = _require.RETURN,
-    ARRAY = _require.ARRAY,
-    PLOT = _require.PLOT,
-    CLS = _require.CLS,
-    CLC = _require.CLC,
-    CLT = _require.CLT,
-    Variable = _require.Variable;
-
-var exprToJS = require('./expr');
-
-var _require2 = require('./errors'),
-    ParseError = _require2.ParseError;
-
-var Parser =
-/*#__PURE__*/
-function () {
-  _createClass(Parser, null, [{
-    key: "parseLine",
-    value: function parseLine(line) {
-      var t = new Tokenizer(line);
-      t.tokenize();
-      var p = new Parser(t);
-      return p.parse();
-    }
-  }]);
-
-  function Parser(tokenizer) {
-    _classCallCheck(this, Parser);
-
-    this.tokenizer = tokenizer;
-    this.lineno = this.getLineNo(this.tokenizer.next());
-  }
-
-  _createClass(Parser, [{
-    key: "parse",
-    value: function parse() {
-      var top = this.tokenizer.next();
-      this.assertType(top, 'keyword');
-
-      switch (top.lexeme) {
-        case 'PRINT':
-          return new PRINT(this.lineno, this.expectExpr(), this.acceptLineMod());
-
-        case 'LET':
-          {
-            var variable = this.expectVariable();
-            this.expectOperation('=');
-            return new LET(this.lineno, variable, this.expectExpr());
-          }
-
-        case 'REM':
-          return new REM(this.lineno, this.expectComment());
-
-        case 'PAUSE':
-          return new PAUSE(this.lineno, this.expectExpr());
-
-        case 'INPUT':
-          {
-            var expr = this.expectExpr();
-            this.expectLineMod();
-            return new INPUT(this.lineno, expr, this.expectVariable());
-          }
-
-        case 'FOR':
-          {
-            var _variable = this.expectVariable();
-
-            this.expectOperation('=');
-            var frm = this.expectExpr();
-            this.expectKeyword('TO');
-            var to = this.expectExpr();
-            var step = this.acceptKeyword('STEP') ? this.expectExpr() : null;
-            return new FOR(this.lineno, _variable, frm, to, step);
-          }
-
-        case 'NEXT':
-          return new NEXT(this.lineno, this.expectVariable());
-
-        case 'GOTO':
-          return new GOTO(this.lineno, this.expectExpr());
-
-        case 'END':
-          return new END(this.lineno);
-
-        case 'IF':
-          var cond = this.expectExpr();
-          this.expectKeyword('THEN');
-          var then; // Shortcut: number is interpreted as goto statement.
-
-          if (this.tokenizer.peek().type === 'number') {
-            then = new GOTO(this.lineno, this.expectExpr());
-          } else {
-            then = this.parse();
-          }
-
-          var elze = null;
-
-          if (this.acceptKeyword('else')) {
-            if (this.tokenizer.peek().type === 'number') {
-              elze = new GOTO(this.lineno, this.expectExpr());
-            } else {
-              elze = this.parse();
+parcelRequire = function(e, t, n, r) {
+    var i, o = "function" == typeof parcelRequire && parcelRequire,
+        s = "function" == typeof require && require;
+
+    function u(n, r) {
+        if (!t[n]) {
+            if (!e[n]) {
+                var i = "function" == typeof parcelRequire && parcelRequire;
+                if (!r && i) return i(n, !0);
+                if (o) return o(n, !0);
+                if (s && "string" == typeof n) return s(n);
+                var a = new Error("Cannot find module '" + n + "'");
+                throw a.code = "MODULE_NOT_FOUND", a
             }
-          }
-
-          return new IF(this.lineno, cond, then, elze);
-
-        case 'GOSUB':
-          return new GOSUB(this.lineno, this.expectExpr());
-
-        case 'RETURN':
-          return new RETURN(this.lineno);
-
-        case 'ARRAY':
-          return new ARRAY(this.lineno, this.expectVariable());
-
-        case 'PLOT':
-          var x = this.expectExpr(true);
-          this.expectOperation(',');
-          var y = this.expectExpr(true);
-          this.expectOperation(',');
-          var color = this.expectExpr(true);
-          return new PLOT(this.lineno, x, y, color);
-
-        case 'CLS':
-          return new CLS(this.lineno);
-
-        case 'CLC':
-          return new CLC(this.lineno);
-
-        case 'CLT':
-          return new CLT(this.lineno);
-      }
-
-      throw new ParseError(this.lineno, "Unexpected token ".concat(top.lexeme));
-    }
-  }, {
-    key: "acceptKeyword",
-    value: function acceptKeyword(keyword) {
-      if (this.tokenizer.peek().type === 'keyword') {
-        return this.tokenizer.next();
-      }
-
-      return null;
-    }
-  }, {
-    key: "expectKeyword",
-    value: function expectKeyword(keyword) {
-      var t = this.acceptKeyword(keyword);
-
-      if (t == null) {
-        throw new ParseError(this.lineno, "Expected ".concat(keyword, " but got ").concat(this.tokenizer.peek().lexeme));
-      }
-
-      return t.lexeme;
-    }
-  }, {
-    key: "expectComment",
-    value: function expectComment() {
-      var t = this.tokenizer.next();
-
-      if (t.type === 'comment') {
-        this.assertType(this.tokenizer.next(), 'eof');
-        return t.lexeme;
-      }
-
-      this.assertType(t, 'eof');
-      return '';
-    }
-  }, {
-    key: "expectOperation",
-    value: function expectOperation(op) {
-      var t = this.tokenizer.next();
-      this.assertType(t, 'operation');
-
-      if (t.lexeme !== op) {
-        throw new ParseError(this.lineno, 'Expected operation ' + op);
-      }
-
-      return t.lexeme;
-    }
-  }, {
-    key: "expectVariable",
-    value: function expectVariable() {
-      var t = this.tokenizer.next();
-      this.assertType(t, 'variable');
-      return new Variable(this.lineno, t.lexeme, this.acceptSubscript());
-    }
-  }, {
-    key: "expectExpr",
-    value: function expectExpr() {
-      var stopOnComma = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
-      var expr = [];
-      var brackets = 0;
-
-      while (this.tokenizer.peek() != Tokenizer.eof) {
-        if (stopOnComma && this.tokenizer.peek().lexeme === ',') {
-          break;
+            l.resolve = function(t) {
+                return e[n][1][t] || t
+            }, l.cache = {};
+            var c = t[n] = new u.Module(n);
+            e[n][0].call(c.exports, l, c, c.exports, this)
         }
+        return t[n].exports;
 
-        if (!Tokenizer.expressionTypes.includes(this.tokenizer.peek().type)) {
-          break;
+        function l(e) {
+            return u(l.resolve(e))
         }
-
-        var t = this.tokenizer.peek(); // We might be in a subscript or function call and if we see an
-        // extra paren it's not ours to eat.
-
-        if (brackets === 0 && (t.lexeme === ']' || t.lexeme === ')')) {
-          break;
-        }
-
-        this.tokenizer.next();
-
-        if (t.lexeme === '[' || t.lexeme === '(') {
-          brackets++;
-        }
-
-        if (t.lexeme === ']' || t.lexeme === ']') {
-          brackets--;
-        }
-
-        expr.push(t);
-      }
-
-      if (expr.length === 0) {
-        throw new ParseError(this.lineno, 'Expected expression');
-      }
-
-      return exprToJS(expr);
     }
-  }, {
-    key: "expectLineMod",
-    value: function expectLineMod() {
-      if (!this.acceptLineMod()) {
-        throw new ParseError(this.lineno, 'Expected ;');
-      }
-
-      return true;
-    }
-  }, {
-    key: "acceptLineMod",
-    value: function acceptLineMod() {
-      if (this.tokenizer.peek().type === 'linemod') {
-        this.tokenizer.next();
-        return true;
-      }
-
-      return false;
-    }
-  }, {
-    key: "acceptSubscript",
-    value: function acceptSubscript() {
-      if (this.tokenizer.peek().lexeme !== '[') return null;
-      this.assertType(this.tokenizer.next(), 'operation', '[');
-      var expr = this.expectExpr();
-      this.assertType(this.tokenizer.next(), 'operation', ']');
-      return expr;
-    }
-  }, {
-    key: "assertType",
-    value: function assertType(token, expected) {
-      var value = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
-
-      if (token.type !== expected) {
-        throw new ParseError(this.lineno, "Expected a ".concat(expected, " but got a ").concat(token.type, " instead \uD83D\uDE15"));
-      }
-
-      if (value != null && token.lexeme !== value) {
-        throw new ParseError(this.lineno, "Expected a ".concat(value, " but got a ").concat(token.lexeme));
-      }
-    }
-  }, {
-    key: "getLineNo",
-    value: function getLineNo(token) {
-      this.assertType(token, 'lineno');
-
-      if (typeof token.lexeme !== 'number') {
-        throw new ParseError(this.lineno, 'Lines should start with line numbers');
-      }
-
-      return token.lexeme;
-    }
-  }]);
-
-  return Parser;
-}();
-
-module.exports = Parser;
-},{"./tokenizer":"tokenizer.js","./nodes":"nodes.js","./expr":"expr.js","./errors":"errors.js"}],"basic.js":[function(require,module,exports) {
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-var Context = require('context-eval');
-
-var Parser = require('./parser');
-
-var Functions = require('./functions');
-
-var _require = require('./errors'),
-    ParseError = _require.ParseError,
-    RuntimeError = _require.RuntimeError;
-
-var Basic =
-/*#__PURE__*/
-function () {
-  function Basic(_ref) {
-    var console = _ref.console,
-        debugLevel = _ref.debugLevel,
-        display = _ref.display,
-        _ref$constants = _ref.constants,
-        constants = _ref$constants === void 0 ? {
-      PI: Math.PI,
-      LEVEL: 1
-    } : _ref$constants;
-
-    _classCallCheck(this, Basic);
-
-    this.debugLevel = debugLevel;
-    this.console = console;
-    this.context = new Context({
-      __pgb: this
-    });
-    this.variables = {};
-    this.lineno = -1;
-    this.program = [];
-    this.loops = {};
-    this.stack = [];
-    this.jumped = false;
-    this.display = display;
-    this.constants = constants;
-  }
-
-  _createClass(Basic, [{
-    key: "debug",
-    value: function debug(str) {
-      var level = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
-
-      if (this.debugLevel >= level) {
-        console.log("Debug ".concat(this.lineno, ":"), str);
-      }
-    }
-  }, {
-    key: "run",
-    value: function run(program) {
-      var _this = this;
-
-      return new Promise(function (resolve, reject) {
-        _this.onEnd = {
-          resolve: resolve,
-          reject: reject
-        };
-        _this.ended = false;
-        var seen = {};
-        _this.program = program.split('\n').filter(function (l) {
-          return l.trim() !== '';
-        }).map(function (l) {
-          try {
-            return Parser.parseLine(l);
-          } catch (e) {
-            _this.end(e);
-          }
-        }).sort(function (a, b) {
-          return a.lineno - b.lineno;
-        });
-
-        _this.program.forEach(function (_ref2) {
-          var lineno = _ref2.lineno;
-
-          if (seen[lineno]) {
-            _this.end(new ParseError(lineno, "Line with number ".concat(lineno, " repeated")));
-          }
-
-          seen[lineno] = true;
-        });
-
-        if (!_this.program.length) return _this.end();
-        _this.lineno = _this.program[0].lineno;
-
-        _this.execute();
-      });
-    }
-  }, {
-    key: "execute",
-    value: function execute() {
-      var _this2 = this;
-
-      while (true) {
-        this.step();
-        if (this.ended) return;
-
-        if (!this.jumped) {
-          var next = this.getNextLine();
-
-          if (!next) {
-            this.end();
-            return;
-          }
-
-          this.lineno = next.lineno;
-        } else {
-          this.jumped = false;
-        }
-
-        if (this.delay) {
-          var delay = this.delay;
-          this.delay = null;
-          return setTimeout(function () {
-            _this2.execute();
-          }, delay);
-        }
-
-        if (this.halted) {
-          return;
-        }
-      }
-    }
-  }, {
-    key: "getCurLine",
-    value: function getCurLine() {
-      var _this3 = this;
-
-      return this.program.find(function (_ref3) {
-        var lineno = _ref3.lineno;
-        return lineno === _this3.lineno;
-      });
-    }
-  }, {
-    key: "getNextLine",
-    value: function getNextLine() {
-      return this.program[this.program.indexOf(this.getCurLine()) + 1];
-    }
-  }, {
-    key: "step",
-    value: function step() {
-      var node = this.getCurLine();
-
-      if (!node) {
-        this.end(new Error("Cannot find line with number ".concat(this.lineno)));
-      }
-
-      this.debug('step', 1);
-      this.debug(node.toJSON(), 2);
-      node.run(this);
-    }
-  }, {
-    key: "end",
-    value: function end(error) {
-      this.ended = true;
-
-      if (error) {
-        this.debug("program ended with error: ".concat(error.message));
-        this.onEnd.reject(error);
-        throw error;
-      } else {
-        this.debug('program ended');
-        this.onEnd.resolve();
-      }
-    }
-  }, {
-    key: "evaluate",
-    value: function evaluate(code) {
-      try {
-        return this.context.evaluate(code);
-      } catch (e) {
-        console.error('Error evaluating code:', code);
-        throw e;
-      }
-    }
-  }, {
-    key: "set",
-    value: function set(vari, value) {
-      this.variables[vari] = value;
-    }
-  }, {
-    key: "setArray",
-    value: function setArray(vari, sub, value) {
-      this.variables[vari][sub] = value;
-    }
-  }, {
-    key: "array",
-    value: function array(name) {
-      this.variables[name] = {};
-    }
-  }, {
-    key: "fun",
-    value: function fun(name) {
-      if (!Functions[name]) {
-        this.end(new Error("Function ".concat(name, " does not exist")));
-      } // External functions
-
-
-      switch (name.toLowerCase()) {
-        case 'color':
-          return this.color.bind(this);
-
-        case 'getchar':
-          return this.getChar.bind(this);
-      } // Internal utils
-
-
-      return Functions[name];
-    }
-  }, {
-    key: "get",
-    value: function get(vari) {
-      return this.variables[vari] || 0;
-    }
-  }, {
-    key: "getConst",
-    value: function getConst(constant) {
-      if (this.constants.hasOwnProperty(constant)) {
-        return this.constants[constant];
-      }
-
-      this.end(new Error("Constant ".concat(constant, " undefined")));
-    }
-  }, {
-    key: "pause",
-    value: function pause(millis) {
-      this.debug("pause ".concat(millis));
-      this.delay = millis;
-    }
-  }, {
-    key: "goto",
-    value: function goto(lineno) {
-      this.debug("goto ".concat(lineno));
-      this.lineno = lineno;
-      this.jumped = true;
-    }
-  }, {
-    key: "loopStart",
-    value: function loopStart(_ref4) {
-      var variable = _ref4.variable,
-          value = _ref4.value,
-          increment = _ref4.increment,
-          max = _ref4.max;
-      this.debug("marking loop ".concat(variable));
-      this.set(variable, value);
-      var next = this.getNextLine();
-      if (!next) return this.end();
-      this.loops[variable] = {
-        variable: variable,
-        value: value,
-        increment: increment,
-        max: max,
-        lineno: next.lineno
-      };
-    }
-  }, {
-    key: "loopJump",
-    value: function loopJump(name) {
-      this.debug("jumping to loop ".concat(name));
-      var loop = this.loops[name];
-      loop.value += loop.increment;
-      this.set(loop.variable, loop.value);
-      if (loop.value >= loop.max) return;
-      this.goto(loop.lineno);
-    }
-  }, {
-    key: "gosub",
-    value: function gosub(lineno) {
-      var next = this.getNextLine();
-
-      if (next) {
-        this.stack.push(next.lineno);
-      } else {
-        this.stack.push(this.lineno + 1);
-      }
-
-      this.goto(lineno);
-    }
-  }, {
-    key: "return",
-    value: function _return() {
-      if (this.stack.length === 0) {
-        this.end(new Error('No function calls to return from'));
-      }
-
-      var lineno = this.stack.pop();
-      this.goto(lineno);
-    }
-  }, {
-    key: "assertDisplay",
-    value: function assertDisplay() {
-      if (!this.display) {
-        this.end(new Error('No display found'));
-      }
-    }
-  }, {
-    key: "plot",
-    value: function plot(x, y, color) {
-      this.assertDisplay();
-      this.display.plot(x, y, color);
-    }
-  }, {
-    key: "color",
-    value: function color(x, y) {
-      this.assertDisplay();
-      return this.display.color(x, y);
-    }
-  }, {
-    key: "clearAll",
-    value: function clearAll() {
-      this.clearConsole();
-      this.clearGraphics();
-    }
-  }, {
-    key: "print",
-    value: function print(s) {
-      this.console.log(s.toString());
-    }
-  }, {
-    key: "clearConsole",
-    value: function clearConsole() {
-      this.console.clear();
-    }
-  }, {
-    key: "clearGraphics",
-    value: function clearGraphics() {
-      this.assertDisplay();
-      this.display.clear();
-    }
-  }, {
-    key: "getChar",
-    value: function getChar() {
-      this.assertDisplay();
-      return this.display.getChar() || '';
-    }
-  }, {
-    key: "input",
-    value: function input(callback) {
-      this.console.input(callback);
-    }
-  }, {
-    key: "halt",
-    value: function halt() {
-      this.halted = true;
-    }
-  }]);
-
-  return Basic;
-}();
-
-module.exports = Basic;
-},{"context-eval":"node_modules/context-eval/lib/context-browser.js","./parser":"parser.js","./functions":"functions.js","./errors":"errors.js"}],"../../home/runner/bundle-repl/node_modules/process/browser.js":[function(require,module,exports) {
-
-// shim for using process in browser
-var process = module.exports = {}; // cached from whatever global is present so that test runners that stub it
-// don't break things.  But we need to wrap it in a try catch in case it is
-// wrapped in strict mode code which doesn't define any globals.  It's inside a
-// function because try/catches deoptimize in certain engines.
-
-var cachedSetTimeout;
-var cachedClearTimeout;
-
-function defaultSetTimout() {
-  throw new Error('setTimeout has not been defined');
-}
-
-function defaultClearTimeout() {
-  throw new Error('clearTimeout has not been defined');
-}
-
-(function () {
-  try {
-    if (typeof setTimeout === 'function') {
-      cachedSetTimeout = setTimeout;
-    } else {
-      cachedSetTimeout = defaultSetTimout;
-    }
-  } catch (e) {
-    cachedSetTimeout = defaultSetTimout;
-  }
-
-  try {
-    if (typeof clearTimeout === 'function') {
-      cachedClearTimeout = clearTimeout;
-    } else {
-      cachedClearTimeout = defaultClearTimeout;
-    }
-  } catch (e) {
-    cachedClearTimeout = defaultClearTimeout;
-  }
-})();
-
-function runTimeout(fun) {
-  if (cachedSetTimeout === setTimeout) {
-    //normal enviroments in sane situations
-    return setTimeout(fun, 0);
-  } // if setTimeout wasn't available but was latter defined
-
-
-  if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
-    cachedSetTimeout = setTimeout;
-    return setTimeout(fun, 0);
-  }
-
-  try {
-    // when when somebody has screwed with setTimeout but no I.E. maddness
-    return cachedSetTimeout(fun, 0);
-  } catch (e) {
-    try {
-      // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
-      return cachedSetTimeout.call(null, fun, 0);
+    u.isParcelRequire = !0, u.Module = function(e) {
+        this.id = e, this.bundle = u, this.exports = {}
+    }, u.modules = e, u.cache = t, u.parent = o, u.register = function(t, n) {
+        e[t] = [function(e, t) {
+            t.exports = n
+        }, {}]
+    };
+    for (var a = 0; a < n.length; a++) try {
+        u(n[a])
     } catch (e) {
-      // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
-      return cachedSetTimeout.call(this, fun, 0);
+        i || (i = e)
     }
-  }
-}
-
-function runClearTimeout(marker) {
-  if (cachedClearTimeout === clearTimeout) {
-    //normal enviroments in sane situations
-    return clearTimeout(marker);
-  } // if clearTimeout wasn't available but was latter defined
-
-
-  if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
-    cachedClearTimeout = clearTimeout;
-    return clearTimeout(marker);
-  }
-
-  try {
-    // when when somebody has screwed with setTimeout but no I.E. maddness
-    return cachedClearTimeout(marker);
-  } catch (e) {
-    try {
-      // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
-      return cachedClearTimeout.call(null, marker);
-    } catch (e) {
-      // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
-      // Some versions of I.E. have different rules for clearTimeout vs setTimeout
-      return cachedClearTimeout.call(this, marker);
+    if (n.length) {
+        var c = u(n[n.length - 1]);
+        "object" == typeof exports && "undefined" != typeof module ? module.exports = c : "function" == typeof define && define.amd ? define(function() {
+            return c
+        }) : this["pg-basic"] = c
     }
-  }
-}
+    if (parcelRequire = u, i) throw i;
+    return u
+}({
+    "node_modules/context-eval/lib/context-browser.js": [function(e, t, n) {
+        function r(e, t) {
+            this.iframe = document.createElement("iframe"), this.iframe.style.display = "none", (t = t || document.body).appendChild(this.iframe), this.iframe.contentWindow, e && this.extend(e)
+        }
+        arguments[3], r.prototype.evaluate = function(e) {
+            return this.iframe.contentWindow.eval(e)
+        }, r.prototype.destroy = function() {
+            this.iframe && (this.iframe.parentNode.removeChild(this.iframe), this.iframe = null)
+        }, r.prototype.getGlobal = function() {
+            return this.iframe.contentWindow
+        }, r.prototype.extend = function(e) {
+            var t = this.getGlobal();
+            Object.keys(e).forEach(function(n) {
+                t[n] = e[n]
+            })
+        }, t.exports = r
+    }, {}],
+    "functions.js": [function(e, t, n) {
+        var r = {
+                ABS: function(e) {
+                    return Math.abs(e)
+                },
+                COS: function(e) {
+                    return Math.cos(e)
+                },
+                SIN: function(e) {
+                    return Math.sin(e)
+                },
+                TAN: function(e) {
+                    return Math.tan(e)
+                },
+                EXP: function(e) {
+                    return Math.exp(e)
+                },
+                INT: function(e) {
+                    return Math.floor(e)
+                },
+                FLOOR: function(e) {
+                    return Math.floor(e)
+                },
+                ROUND: function(e) {
+                    return Math.round(e)
+                },
+                ATN: function(e) {
+                    return Math.atan(e)
+                },
+                LOG: function(e) {
+                    return Math.log(e)
+                },
+                SGN: function(e) {
+                    return 0 === e ? 0 : e < 0 ? -1 : 1
+                },
+                SQR: function(e) {
+                    return Math.sqrt(e)
+                },
+                VAL: function(e) {
+                    var t = parseFloat(e);
+                    return isNaN(t) ? 0 : t
+                },
+                RND: function() {
+                    var e = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : 0;
+                    return 0 === e ? Math.random() : Math.ceil(Math.random() * e)
+                },
+                ASC: function(e) {
+                    return e.charCodeAt(0)
+                },
+                LEFT: function(e, t) {
+                    return e.slice(0, t)
+                },
+                MID: function(e, t, n) {
+                    return e.substr(t, n)
+                },
+                RIGHT: function(e, t) {
+                    return e.slice(-1 * t)
+                },
+                CHR: function(e) {
+                    return String.fromCharCode(e)
+                },
+                STR: function(e) {
+                    return String.fromCharCode(e)
+                },
+                LEN: function(e) {
+                    return e.length
+                },
+                SPC: function(e) {
+                    return " ".repeat(e)
+                },
+                COLOR: function() {
+                    throw new Error("Unimplemented")
+                },
+                GETCHAR: function() {
+                    throw new Error("Unimplemented")
+                },
+                UPPERCASE: function(e) {
+                    return e.toUpperCase()
+                },
+                LOWERCASE: function(e) {
+                    return e.toLowerCase()
+                }
+            },
+            i = {
+                LEFT$: "LEFT",
+                ATAN: "ATN",
+                CHR$: "CHR",
+                MID$: "MID",
+                RIGHT$: "RIGHT",
+                RAND: "RND",
+                TAB: "SPC"
+            };
+        for (var o in i) r[o] = r[i[o]];
+        t.exports = r
+    }, {}],
+    "tokenizer.js": [function(e, t, n) {
+        function r(e, t) {
+            if (!(e instanceof t)) throw new TypeError("Cannot call a class as a function")
+        }
 
-var queue = [];
-var draining = false;
-var currentQueue;
-var queueIndex = -1;
+        function i(e, t) {
+            for (var n = 0; n < t.length; n++) {
+                var r = t[n];
+                r.enumerable = r.enumerable || !1, r.configurable = !0, "value" in r && (r.writable = !0), Object.defineProperty(e, r.key, r)
+            }
+        }
 
-function cleanUpNextTick() {
-  if (!draining || !currentQueue) {
-    return;
-  }
+        function o(e, t, n) {
+            return t && i(e.prototype, t), n && i(e, n), e
+        }
+        var s = e("./functions"),
+            u = function() {
+                function e(t, n) {
+                    r(this, e), this.type = t, this.lexeme = n
+                }
+                return o(e, [{
+                    key: "toJSON",
+                    value: function() {
+                        return {
+                            type: this.type,
+                            lexeme: this.lexeme
+                        }
+                    }
+                }]), e
+            }(),
+            a = new u("eof", ""),
+            c = /^\s*(\d+)\s*/,
+            l = /^"((\\.|[^"\\])*)"\s*/,
+            h = new RegExp("^(" + ["IF", "THEN", "ELSE", "FOR", "ON", "TO", "STEP", "GOTO", "GOSUB", "RETURN", "NEXT", "INPUT", "LET", "CLC", "CLT", "CLS", "END", "PRINT", "PLOT", "DRAW", "UNDRAW", "ARRAY", "DIM", "DATA", "READ", "REM", "PAUSE", "STOP"].join("|") + ")\\s*", "i"),
+            f = new RegExp("^(" + Object.keys(s).join("|") + ")\\s*", "i"),
+            p = new RegExp("^(" + ["LEVEL", "PI"].join("|") + ")\\s*", "i"),
+            v = /^([a-z][0-9]*)\$?\s*/i,
+            y = /^(\d+(\.\d+)?)\s*/i,
+            m = /^(<>|>=|<=|[,\+\-\*\/%=<>\(\)\]\[])\s*/i,
+            d = /^(AND|OR)\s*/i,
+            x = /^(;)\s*/i,
+            b = function() {
+                function e(t) {
+                    r(this, e), this.stmnt = t, this.tokens = [], this.index = 0, this.tokenized = !1
+                }
+                return o(e, null, [{
+                    key: "tokenizeLine",
+                    value: function(t) {
+                        var n = new e(t);
+                        return n.tokenize(), n.tokens
+                    }
+                }, {
+                    key: "expressionTypes",
+                    get: function() {
+                        return ["string", "function", "operation", "number", "variable", "logic", "constant"]
+                    }
+                }, {
+                    key: "eof",
+                    get: function() {
+                        return a
+                    }
+                }]), o(e, [{
+                    key: "assertTokenized",
+                    value: function() {
+                        if (!this.tokenized) throw new Error("call tokenize first")
+                    }
+                }, {
+                    key: "peek",
+                    value: function() {
+                        var e = arguments.length > 0 && void 0 !== arguments[0] ? arguments[0] : 0;
+                        return this.assertTokenized(), this.index >= this.tokens.length ? a : this.tokens[this.index + e]
+                    }
+                }, {
+                    key: "next",
+                    value: function() {
+                        return this.assertTokenized(), this.index >= this.tokens.length ? a : this.tokens[this.index++]
+                    }
+                }, {
+                    key: "nextExpr",
+                    value: function() {
+                        this.assertTokenized();
+                        for (var t = []; this.index !== this.tokens.length && e.expressionTypes.includes(this.peek().type);) t.push(this.next());
+                        return t
+                    }
+                }, {
+                    key: "tokenize",
+                    value: function() {
+                        var e = this.stmnt.match(c);
+                        if (!e) throw new Error("Expected line number");
+                        for (this.tokens.push(new u("lineno", parseInt(e[1]))), this.stmnt = this.stmnt.slice(e[0].length); this.stmnt.length;) {
+                            var t = this.eatKeyword() || this.eatQuote() || this.eatLogic() || this.eatFunction() || this.eatConstant() || this.eatVariable() || this.eatNumber() || this.eatOperation() || this.eatLineMod();
+                            if (!t) throw new Error("Invalid syntax near: `" + this.stmnt + "'");
+                            this.stmnt = this.stmnt.slice(t.length)
+                        }
+                        this.tokenized = !0
+                    }
+                }, {
+                    key: "eatLogic",
+                    value: function() {
+                        var e = this.stmnt.match(d);
+                        if (e && e[0]) {
+                            var t = e[1].toUpperCase();
+                            return this.tokens.push(new u("logic", t)), e[0]
+                        }
+                        return null
+                    }
+                }, {
+                    key: "eatKeyword",
+                    value: function() {
+                        var e = this.stmnt.match(h);
+                        if (e && e[0]) {
+                            var t = e[1].toUpperCase();
+                            return this.tokens.push(new u("keyword", t)), "REM" === t ? (this.tokens.push(new u("comment", this.stmnt.slice(e[0].length))), this.stmnt) : e[0]
+                        }
+                        return null
+                    }
+                }, {
+                    key: "eatFunction",
+                    value: function() {
+                        var e = this.stmnt.match(f);
+                        if (e && e[0]) {
+                            var t = e[1].toUpperCase();
+                            return this.tokens.push(new u("function", t)), e[0]
+                        }
+                        return null
+                    }
+                }, {
+                    key: "eatConstant",
+                    value: function() {
+                        var e = this.stmnt.match(p);
+                        if (e && e[0]) {
+                            var t = e[1].toUpperCase();
+                            return this.tokens.push(new u("constant", t)), e[0]
+                        }
+                        return null
+                    }
+                }, {
+                    key: "eatVariable",
+                    value: function() {
+                        var e = this.stmnt.match(v);
+                        if (e && e[0]) {
+                            var t = e[1].toUpperCase();
+                            return this.tokens.push(new u("variable", t)), e[0]
+                        }
+                        return null
+                    }
+                }, {
+                    key: "eatNumber",
+                    value: function() {
+                        var e = this.stmnt.match(y);
+                        if (e && e[0]) {
+                            var t = parseFloat(e[1], 10);
+                            if (isNaN(t)) throw new Error("Error parsing number:" + e[1]);
+                            return this.tokens.push(new u("number", t)), e[0]
+                        }
+                        return null
+                    }
+                }, {
+                    key: "eatOperation",
+                    value: function() {
+                        var e = this.stmnt.match(m);
+                        return e && e[0] ? (this.tokens.push(new u("operation", e[1])), e[0]) : null
+                    }
+                }, {
+                    key: "eatQuote",
+                    value: function() {
+                        var e = this.stmnt.match(l);
+                        return e && e[0] ? (this.tokens.push(new u("string", '"'.concat(e[1], '"'))), e[0]) : null
+                    }
+                }, {
+                    key: "eatLineMod",
+                    value: function() {
+                        var e = this.stmnt.match(x);
+                        return e && e[0] ? (this.tokens.push(new u("linemod", '"'.concat(e[1], '"'))), e[0]) : null
+                    }
+                }]), e
+            }();
+        t.exports = b
+    }, {
+        "./functions": "functions.js"
+    }],
+    "nodes.js": [function(e, t, n) {
+        function r(e) {
+            return (r = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(e) {
+                return typeof e
+            } : function(e) {
+                return e && "function" == typeof Symbol && e.constructor === Symbol && e !== Symbol.prototype ? "symbol" : typeof e
+            })(e)
+        }
 
-  draining = false;
+        function i(e, t) {
+            return !t || "object" !== r(t) && "function" != typeof t ? function(e) {
+                if (void 0 === e) throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+                return e
+            }(e) : t
+        }
 
-  if (currentQueue.length) {
-    queue = currentQueue.concat(queue);
-  } else {
-    queueIndex = -1;
-  }
+        function o(e) {
+            return (o = Object.setPrototypeOf ? Object.getPrototypeOf : function(e) {
+                return e.__proto__ || Object.getPrototypeOf(e)
+            })(e)
+        }
 
-  if (queue.length) {
-    drainQueue();
-  }
-}
+        function s(e, t) {
+            if ("function" != typeof t && null !== t) throw new TypeError("Super expression must either be null or a function");
+            e.prototype = Object.create(t && t.prototype, {
+                constructor: {
+                    value: e,
+                    writable: !0,
+                    configurable: !0
+                }
+            }), t && function(e, t) {
+                (Object.setPrototypeOf || function(e, t) {
+                    return e.__proto__ = t, e
+                })(e, t)
+            }(e, t)
+        }
 
-function drainQueue() {
-  if (draining) {
-    return;
-  }
+        function u(e, t) {
+            if (!(e instanceof t)) throw new TypeError("Cannot call a class as a function")
+        }
 
-  var timeout = runTimeout(cleanUpNextTick);
-  draining = true;
-  var len = queue.length;
+        function a(e, t) {
+            for (var n = 0; n < t.length; n++) {
+                var r = t[n];
+                r.enumerable = r.enumerable || !1, r.configurable = !0, "value" in r && (r.writable = !0), Object.defineProperty(e, r.key, r)
+            }
+        }
 
-  while (len) {
-    currentQueue = queue;
-    queue = [];
+        function c(e, t, n) {
+            return t && a(e.prototype, t), n && a(e, n), e
+        }
+        var l = function() {
+                function e(t, n) {
+                    u(this, e), this.lineno = t, this.type = n
+                }
+                return c(e, [{
+                    key: "toJSON",
+                    value: function() {
+                        var e = this,
+                            t = {};
+                        return Object.keys(this).forEach(function(n) {
+                            t[n] = e[n]
+                        }), t
+                    }
+                }, {
+                    key: "assert",
+                    value: function(e, t) {
+                        if (!e) throw new Error("Line ".concat(this.lineno, ": ").concat(t))
+                    }
+                }]), e
+            }(),
+            h = function(e) {
+                function t(e, n, r) {
+                    var s;
+                    return u(this, t), (s = i(this, o(t).call(this, e, "variable"))).name = n, null == r ? s.array = !1 : (s.array = !0, s.subscript = r), s
+                }
+                return s(t, l), t
+            }(),
+            f = function(e) {
+                function t(e, n) {
+                    var r;
+                    return u(this, t), (r = i(this, o(t).call(this, e, "REM"))).comment = n, r
+                }
+                return s(t, l), c(t, [{
+                    key: "run",
+                    value: function() {}
+                }]), t
+            }(),
+            p = function(e) {
+                function t(e, n, r) {
+                    var s;
+                    return u(this, t), (s = i(this, o(t).call(this, e, "PRINT"))).expr = n, s.newline = !r, s
+                }
+                return s(t, l), c(t, [{
+                    key: "run",
+                    value: function(e) {
+                        var t = e.evaluate(this.expr);
+                        e.print(t), this.newline && e.print("\n")
+                    }
+                }]), t
+            }(),
+            v = function(e) {
+                function t(e, n) {
+                    var r;
+                    return u(this, t), (r = i(this, o(t).call(this, e, "GOTO"))).expr = n, r
+                }
+                return s(t, l), c(t, [{
+                    key: "run",
+                    value: function(e) {
+                        var t = e.evaluate(this.expr);
+                        this.assert("number" == typeof t, "Expected GOTO `expr` to evaluate to a number"), e.goto(t)
+                    }
+                }]), t
+            }(),
+            y = function(e) {
+                function t(e, n, r) {
+                    var s;
+                    return u(this, t), (s = i(this, o(t).call(this, e, "LET"))).variable = n, s.expr = r, s
+                }
+                return s(t, l), c(t, [{
+                    key: "run",
+                    value: function(e) {
+                        var t = e.evaluate(this.expr);
+                        if (this.variable.array) {
+                            var n = e.evaluate(this.variable.subscript);
+                            e.setArray(this.variable.name, n, t)
+                        } else e.set(this.variable.name, t)
+                    }
+                }]), t
+            }(),
+            m = function(e) {
+                function t(e, n) {
+                    var r;
+                    return u(this, t), (r = i(this, o(t).call(this, e, "PAUSE"))).expr = n, r
+                }
+                return s(t, l), c(t, [{
+                    key: "run",
+                    value: function(e) {
+                        var t = e.evaluate(this.expr);
+                        if ("number" != typeof t) throw new Error("Expected pause value to be a number");
+                        e.pause(t)
+                    }
+                }]), t
+            }(),
+            d = function(e) {
+                function t(e, n, r) {
+                    var s;
+                    return u(this, t), (s = i(this, o(t).call(this, e, "INPUT"))).expr = n, s.variable = r, s
+                }
+                return s(t, l), c(t, [{
+                    key: "run",
+                    value: function(e) {
+                        var t = this,
+                            n = e.evaluate(this.expr);
+                        e.print(n), e.halt(), e.input(function(n) {
+                            if (t.variable.array) {
+                                var r = e.evaluate(t.variable.subscript);
+                                e.setArray(t.variable.name, r, n)
+                            } else e.set(t.variable.name, n);
+                            e.execute()
+                        })
+                    }
+                }]), t
+            }(),
+            x = function(e) {
+                function t(e, n, r, s, a) {
+                    var c;
+                    return u(this, t), (c = i(this, o(t).call(this, e, "FOR"))).lineno = e, c.variable = n, c.left = r, c.right = s, c.step = a, c
+                }
+                return s(t, l), c(t, [{
+                    key: "run",
+                    value: function(e) {
+                        var t = e.evaluate(this.left),
+                            n = e.evaluate(this.right),
+                            r = this.step ? e.evaluate(this.step) : 1;
+                        if (this.variable.array) throw new Error("Cannot use variables in for");
+                        e.loopStart({
+                            variable: this.variable.name,
+                            value: t,
+                            max: n,
+                            increment: r
+                        })
+                    }
+                }]), t
+            }(),
+            b = function(e) {
+                function t(e, n) {
+                    var r;
+                    return u(this, t), (r = i(this, o(t).call(this, e, "NEXT"))).variable = n, r
+                }
+                return s(t, l), c(t, [{
+                    key: "run",
+                    value: function(e) {
+                        e.loopJump(this.variable.name)
+                    }
+                }]), t
+            }(),
+            k = function(e) {
+                function t(e, n, r) {
+                    var s, a = arguments.length > 3 && void 0 !== arguments[3] ? arguments[3] : "black";
+                    return u(this, t), (s = i(this, o(t).call(this, e, "PLOT"))).x = n, s.y = r, s.color = a, s
+                }
+                return s(t, l), c(t, [{
+                    key: "run",
+                    value: function(e) {
+                        e.plot(e.evaluate(this.x), e.evaluate(this.y), e.evaluate(this.color))
+                    }
+                }]), t
+            }(),
+            w = function(e) {
+                function t() {
+                    return u(this, t), i(this, o(t).apply(this, arguments))
+                }
+                return s(t, l), c(t, [{
+                    key: "run",
+                    value: function(e) {
+                        e.end()
+                    }
+                }]), t
+            }(),
+            g = function(e) {
+                function t(e, n, r, s) {
+                    var a;
+                    return u(this, t), (a = i(this, o(t).call(this, e, "IF"))).condition = n, a.then = r, a.elze = s, a
+                }
+                return s(t, l), c(t, [{
+                    key: "run",
+                    value: function(e) {
+                        e.evaluate(this.condition) ? this.then.run(e) : this.other && this.elze.run(e)
+                    }
+                }]), t
+            }(),
+            E = function(e) {
+                function t(e, n) {
+                    var r;
+                    return u(this, t), (r = i(this, o(t).call(this, e, "GOSUB"))).expr = n, r
+                }
+                return s(t, l), c(t, [{
+                    key: "run",
+                    value: function(e) {
+                        var t = e.evaluate(this.expr);
+                        if ("number" != typeof t) throw new Error("Expected GOSUB argument to be a number");
+                        e.gosub(t)
+                    }
+                }]), t
+            }(),
+            T = function(e) {
+                function t() {
+                    return u(this, t), i(this, o(t).apply(this, arguments))
+                }
+                return s(t, l), c(t, [{
+                    key: "run",
+                    value: function(e) {
+                        e.return()
+                    }
+                }]), t
+            }(),
+            O = function(e) {
+                function t(e, n) {
+                    var r;
+                    return u(this, t), (r = i(this, o(t).call(this, e, "ARRAY"))).variable = n, r
+                }
+                return s(t, l), c(t, [{
+                    key: "run",
+                    value: function(e) {
+                        e.array(this.variable.name)
+                    }
+                }]), t
+            }(),
+            R = function(e) {
+                function t() {
+                    return u(this, t), i(this, o(t).apply(this, arguments))
+                }
+                return s(t, l), c(t, [{
+                    key: "run",
+                    value: function(e) {
+                        e.clearAll()
+                    }
+                }]), t
+            }(),
+            L = function(e) {
+                function t() {
+                    return u(this, t), i(this, o(t).apply(this, arguments))
+                }
+                return s(t, l), c(t, [{
+                    key: "run",
+                    value: function(e) {
+                        e.clearConsole()
+                    }
+                }]), t
+            }(),
+            C = function(e) {
+                function t() {
+                    return u(this, t), i(this, o(t).apply(this, arguments))
+                }
+                return s(t, l), c(t, [{
+                    key: "run",
+                    value: function(e) {
+                        e.clearGraphics()
+                    }
+                }]), t
+            }();
+        t.exports = {
+            Node: l,
+            PRINT: p,
+            GOTO: v,
+            LET: y,
+            REM: f,
+            PAUSE: m,
+            INPUT: d,
+            FOR: x,
+            NEXT: b,
+            PLOT: k,
+            END: w,
+            IF: g,
+            GOSUB: E,
+            RETURN: T,
+            ARRAY: O,
+            CLS: R,
+            CLT: L,
+            CLC: C,
+            Variable: h
+        }
+    }, {}],
+    "expr.js": [function(e, t, n) {
+        t.exports = function(e) {
+            for (var t = ""; e.length;) {
+                var n = e.shift();
+                if ("variable" !== n.type)
+                    if ("function" !== n.type)
+                        if ("constant" !== n.type)
+                            if ("logic" !== n.type) {
+                                if ("operation" === n.type) {
+                                    if ("<>" === n.lexeme) {
+                                        t += "!=";
+                                        continue
+                                    }
+                                    if ("=" === n.lexeme) {
+                                        t += "==";
+                                        continue
+                                    }
+                                }
+                                t += n.lexeme
+                            } else "AND" === n.lexeme ? t += "&&" : "OR" === n.lexeme && (t += "||");
+                else t += '__pgb.getConst("' + n.lexeme + '")';
+                else t += '__pgb.fun("' + n.lexeme + '")';
+                else t += '__pgb.get("' + n.lexeme + '")'
+            }
+            return t
+        }
+    }, {}],
+    "errors.js": [function(e, t, n) {
+        function r(e) {
+            return (r = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function(e) {
+                return typeof e
+            } : function(e) {
+                return e && "function" == typeof Symbol && e.constructor === Symbol && e !== Symbol.prototype ? "symbol" : typeof e
+            })(e)
+        }
 
-    while (++queueIndex < len) {
-      if (currentQueue) {
-        currentQueue[queueIndex].run();
-      }
-    }
+        function i(e, t) {
+            if (!(e instanceof t)) throw new TypeError("Cannot call a class as a function")
+        }
 
-    queueIndex = -1;
-    len = queue.length;
-  }
+        function o(e, t) {
+            return !t || "object" !== r(t) && "function" != typeof t ? function(e) {
+                if (void 0 === e) throw new ReferenceError("this hasn't been initialised - super() hasn't been called");
+                return e
+            }(e) : t
+        }
 
-  currentQueue = null;
-  draining = false;
-  runClearTimeout(timeout);
-}
+        function s(e, t) {
+            if ("function" != typeof t && null !== t) throw new TypeError("Super expression must either be null or a function");
+            e.prototype = Object.create(t && t.prototype, {
+                constructor: {
+                    value: e,
+                    writable: !0,
+                    configurable: !0
+                }
+            }), t && a(e, t)
+        }
 
-process.nextTick = function (fun) {
-  var args = new Array(arguments.length - 1);
+        function u(e) {
+            var t = "function" == typeof Map ? new Map : void 0;
+            return (u = function(e) {
+                if (null === e || (n = e, -1 === Function.toString.call(n).indexOf("[native code]"))) return e;
+                var n;
+                if ("function" != typeof e) throw new TypeError("Super expression must either be null or a function");
+                if (void 0 !== t) {
+                    if (t.has(e)) return t.get(e);
+                    t.set(e, r)
+                }
 
-  if (arguments.length > 1) {
-    for (var i = 1; i < arguments.length; i++) {
-      args[i - 1] = arguments[i];
-    }
-  }
+                function r() {
+                    return function(e, t, n) {
+                        return (function() {
+                            if ("undefined" == typeof Reflect || !Reflect.construct) return !1;
+                            if (Reflect.construct.sham) return !1;
+                            if ("function" == typeof Proxy) return !0;
+                            try {
+                                return Date.prototype.toString.call(Reflect.construct(Date, [], function() {})), !0
+                            } catch (e) {
+                                return !1
+                            }
+                        }() ? Reflect.construct : function(e, t, n) {
+                            var r = [null];
+                            r.push.apply(r, t);
+                            var i = new(Function.bind.apply(e, r));
+                            return n && a(i, n.prototype), i
+                        }).apply(null, arguments)
+                    }(e, arguments, c(this).constructor)
+                }
+                return r.prototype = Object.create(e.prototype, {
+                    constructor: {
+                        value: r,
+                        enumerable: !1,
+                        writable: !0,
+                        configurable: !0
+                    }
+                }), a(r, e)
+            })(e)
+        }
 
-  queue.push(new Item(fun, args));
+        function a(e, t) {
+            return (a = Object.setPrototypeOf || function(e, t) {
+                return e.__proto__ = t, e
+            })(e, t)
+        }
 
-  if (queue.length === 1 && !draining) {
-    runTimeout(drainQueue);
-  }
-}; // v8 likes predictible objects
+        function c(e) {
+            return (c = Object.setPrototypeOf ? Object.getPrototypeOf : function(e) {
+                return e.__proto__ || Object.getPrototypeOf(e)
+            })(e)
+        }
+        var l = function(e) {
+                function t(e, n) {
+                    var r;
+                    return i(this, t), (r = o(this, c(t).call(this))).message = "Parse error on line ".concat(e, ": ").concat(n), r.name = "ParseError", r
+                }
+                return s(t, u(Error)), t
+            }(),
+            h = function(e) {
+                function t(e, n) {
+                    var r;
+                    return i(this, t), (r = o(this, c(t).call(this))).message = "Error on line ".concat(e, ": ").concat(n), r.name = "RuntimeError", r
+                }
+                return s(t, u(Error)), t
+            }();
+        t.exports = {
+            ParseError: l,
+            RuntimeError: h
+        }
+    }, {}],
+    "parser.js": [function(e, t, n) {
+        function r(e, t) {
+            for (var n = 0; n < t.length; n++) {
+                var r = t[n];
+                r.enumerable = r.enumerable || !1, r.configurable = !0, "value" in r && (r.writable = !0), Object.defineProperty(e, r.key, r)
+            }
+        }
 
+        function i(e, t, n) {
+            return t && r(e.prototype, t), n && r(e, n), e
+        }
+        var o = e("./tokenizer"),
+            s = e("./nodes"),
+            u = s.PRINT,
+            a = s.LET,
+            c = s.REM,
+            l = s.PAUSE,
+            h = s.INPUT,
+            f = s.FOR,
+            p = s.NEXT,
+            v = s.GOTO,
+            y = s.END,
+            m = s.IF,
+            d = s.GOSUB,
+            x = s.RETURN,
+            b = s.ARRAY,
+            k = s.PLOT,
+            w = s.CLS,
+            g = s.CLC,
+            E = s.CLT,
+            T = s.Variable,
+            O = e("./expr"),
+            R = e("./errors").ParseError,
+            L = function() {
+                function e(t) {
+                    ! function(e, t) {
+                        if (!(e instanceof t)) throw new TypeError("Cannot call a class as a function")
+                    }(this, e), this.tokenizer = t, this.lineno = this.getLineNo(this.tokenizer.next())
+                }
+                return i(e, null, [{
+                    key: "parseLine",
+                    value: function(t) {
+                        var n = new o(t);
+                        return n.tokenize(), new e(n).parse()
+                    }
+                }]), i(e, [{
+                    key: "parse",
+                    value: function() {
+                        var e = this.tokenizer.next();
+                        switch (this.assertType(e, "keyword"), e.lexeme) {
+                            case "PRINT":
+                                return new u(this.lineno, this.expectExpr(), this.acceptLineMod());
+                            case "LET":
+                                var t = this.expectVariable();
+                                return this.expectOperation("="), new a(this.lineno, t, this.expectExpr());
+                            case "REM":
+                                return new c(this.lineno, this.expectComment());
+                            case "PAUSE":
+                                return new l(this.lineno, this.expectExpr());
+                            case "INPUT":
+                                var n = this.expectExpr();
+                                return this.expectLineMod(), new h(this.lineno, n, this.expectVariable());
+                            case "FOR":
+                                var r = this.expectVariable();
+                                this.expectOperation("=");
+                                var i = this.expectExpr();
+                                this.expectKeyword("TO");
+                                var o = this.expectExpr(),
+                                    s = this.acceptKeyword("STEP") ? this.expectExpr() : null;
+                                return new f(this.lineno, r, i, o, s);
+                            case "NEXT":
+                                return new p(this.lineno, this.expectVariable());
+                            case "GOTO":
+                                return new v(this.lineno, this.expectExpr());
+                            case "END":
+                                return new y(this.lineno);
+                            case "IF":
+                                var T, O = this.expectExpr();
+                                this.expectKeyword("THEN"), T = "number" === this.tokenizer.peek().type ? new v(this.lineno, this.expectExpr()) : this.parse();
+                                var L = null;
+                                return this.acceptKeyword("else") && (L = "number" === this.tokenizer.peek().type ? new v(this.lineno, this.expectExpr()) : this.parse()), new m(this.lineno, O, T, L);
+                            case "GOSUB":
+                                return new d(this.lineno, this.expectExpr());
+                            case "RETURN":
+                                return new x(this.lineno);
+                            case "ARRAY":
+                                return new b(this.lineno, this.expectVariable());
+                            case "PLOT":
+                                var C = this.expectExpr(!0);
+                                this.expectOperation(",");
+                                var N = this.expectExpr(!0);
+                                this.expectOperation(",");
+                                var S = this.expectExpr(!0);
+                                return new k(this.lineno, C, N, S);
+                            case "CLS":
+                                return new w(this.lineno);
+                            case "CLC":
+                                return new g(this.lineno);
+                            case "CLT":
+                                return new E(this.lineno)
+                        }
+                        throw new R(this.lineno, "Unexpected token ".concat(e.lexeme))
+                    }
+                }, {
+                    key: "acceptKeyword",
+                    value: function(e) {
+                        return "keyword" === this.tokenizer.peek().type ? this.tokenizer.next() : null
+                    }
+                }, {
+                    key: "expectKeyword",
+                    value: function(e) {
+                        var t = this.acceptKeyword(e);
+                        if (null == t) throw new R(this.lineno, "Expected ".concat(e, " but got ").concat(this.tokenizer.peek().lexeme));
+                        return t.lexeme
+                    }
+                }, {
+                    key: "expectComment",
+                    value: function() {
+                        var e = this.tokenizer.next();
+                        return "comment" === e.type ? (this.assertType(this.tokenizer.next(), "eof"), e.lexeme) : (this.assertType(e, "eof"), "")
+                    }
+                }, {
+                    key: "expectOperation",
+                    value: function(e) {
+                        var t = this.tokenizer.next();
+                        if (this.assertType(t, "operation"), t.lexeme !== e) throw new R(this.lineno, "Expected operation " + e);
+                        return t.lexeme
+                    }
+                }, {
+                    key: "expectVariable",
+                    value: function() {
+                        var e = this.tokenizer.next();
+                        return this.assertType(e, "variable"), new T(this.lineno, e.lexeme, this.acceptSubscript())
+                    }
+                }, {
+                    key: "expectExpr",
+                    value: function() {
+                        for (var e = arguments.length > 0 && void 0 !== arguments[0] && arguments[0], t = [], n = 0; this.tokenizer.peek() != o.eof && (!e || "," !== this.tokenizer.peek().lexeme) && o.expressionTypes.includes(this.tokenizer.peek().type);) {
+                            var r = this.tokenizer.peek();
+                            if (0 === n && ("]" === r.lexeme || ")" === r.lexeme)) break;
+                            this.tokenizer.next(), "[" !== r.lexeme && "(" !== r.lexeme || n++, "]" !== r.lexeme && "]" !== r.lexeme || n--, t.push(r)
+                        }
+                        if (0 === t.length) throw new R(this.lineno, "Expected expression");
+                        return O(t)
+                    }
+                }, {
+                    key: "expectLineMod",
+                    value: function() {
+                        if (!this.acceptLineMod()) throw new R(this.lineno, "Expected ;");
+                        return !0
+                    }
+                }, {
+                    key: "acceptLineMod",
+                    value: function() {
+                        return "linemod" === this.tokenizer.peek().type && (this.tokenizer.next(), !0)
+                    }
+                }, {
+                    key: "acceptSubscript",
+                    value: function() {
+                        if ("[" !== this.tokenizer.peek().lexeme) return null;
+                        this.assertType(this.tokenizer.next(), "operation", "[");
+                        var e = this.expectExpr();
+                        return this.assertType(this.tokenizer.next(), "operation", "]"), e
+                    }
+                }, {
+                    key: "assertType",
+                    value: function(e, t) {
+                        var n = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : null;
+                        if (e.type !== t) throw new R(this.lineno, "Expected a ".concat(t, " but got a ").concat(e.type, " instead 😕"));
+                        if (null != n && e.lexeme !== n) throw new R(this.lineno, "Expected a ".concat(n, " but got a ").concat(e.lexeme))
+                    }
+                }, {
+                    key: "getLineNo",
+                    value: function(e) {
+                        if (this.assertType(e, "lineno"), "number" != typeof e.lexeme) throw new R(this.lineno, "Lines should start with line numbers");
+                        return e.lexeme
+                    }
+                }]), e
+            }();
+        t.exports = L
+    }, {
+        "./tokenizer": "tokenizer.js",
+        "./nodes": "nodes.js",
+        "./expr": "expr.js",
+        "./errors": "errors.js"
+    }],
+    "basic.js": [function(e, t, n) {
+        function r(e, t) {
+            for (var n = 0; n < t.length; n++) {
+                var r = t[n];
+                r.enumerable = r.enumerable || !1, r.configurable = !0, "value" in r && (r.writable = !0), Object.defineProperty(e, r.key, r)
+            }
+        }
+        var i = e("context-eval"),
+            o = e("./parser"),
+            s = e("./functions"),
+            u = e("./errors"),
+            a = u.ParseError,
+            c = (u.RuntimeError, function() {
+                function e(t) {
+                    var n = t.console,
+                        r = t.debugLevel,
+                        o = t.display,
+                        s = t.constants,
+                        u = void 0 === s ? {
+                            PI: Math.PI,
+                            LEVEL: 1
+                        } : s;
+                    ! function(e, t) {
+                        if (!(e instanceof t)) throw new TypeError("Cannot call a class as a function")
+                    }(this, e), this.debugLevel = r, this.console = n, this.context = new i({
+                        __pgb: this
+                    }), this.variables = {}, this.lineno = -1, this.program = [], this.loops = {}, this.stack = [], this.jumped = !1, this.display = o, this.constants = u
+                }
+                var t, n;
+                return t = e, (n = [{
+                    key: "debug",
+                    value: function(e) {
+                        var t = arguments.length > 1 && void 0 !== arguments[1] ? arguments[1] : 1;
+                        this.debugLevel >= t && console.log("Debug ".concat(this.lineno, ":"), e)
+                    }
+                }, {
+                    key: "run",
+                    value: function(e) {
+                        var t = this;
+                        return new Promise(function(n, r) {
+                            t.onEnd = {
+                                resolve: n,
+                                reject: r
+                            }, t.ended = !1;
+                            var i = {};
+                            if (t.program = e.split("\n").filter(function(e) {
+                                    return "" !== e.trim()
+                                }).map(function(e) {
+                                    try {
+                                        return o.parseLine(e)
+                                    } catch (e) {
+                                        t.end(e)
+                                    }
+                                }).sort(function(e, t) {
+                                    return e.lineno - t.lineno
+                                }), t.program.forEach(function(e) {
+                                    var n = e.lineno;
+                                    i[n] && t.end(new a(n, "Line with number ".concat(n, " repeated"))), i[n] = !0
+                                }), !t.program.length) return t.end();
+                            t.lineno = t.program[0].lineno, t.execute()
+                        })
+                    }
+                }, {
+                    key: "execute",
+                    value: function() {
+                        for (var e = this;;) {
+                            if (this.step(), this.ended) return;
+                            if (this.jumped) this.jumped = !1;
+                            else {
+                                var t = this.getNextLine();
+                                if (!t) return void this.end();
+                                this.lineno = t.lineno
+                            }
+                            if (this.delay) {
+                                var n = this.delay;
+                                return this.delay = null, setTimeout(function() {
+                                    e.execute()
+                                }, n)
+                            }
+                            if (this.halted) return
+                        }
+                    }
+                }, {
+                    key: "getCurLine",
+                    value: function() {
+                        var e = this;
+                        return this.program.find(function(t) {
+                            return t.lineno === e.lineno
+                        })
+                    }
+                }, {
+                    key: "getNextLine",
+                    value: function() {
+                        return this.program[this.program.indexOf(this.getCurLine()) + 1]
+                    }
+                }, {
+                    key: "step",
+                    value: function() {
+                        var e = this.getCurLine();
+                        e || this.end(new Error("Cannot find line with number ".concat(this.lineno))), this.debug("step", 1), this.debug(e.toJSON(), 2), e.run(this)
+                    }
+                }, {
+                    key: "end",
+                    value: function(e) {
+                        if (this.ended = !0, e) throw this.debug("program ended with error: ".concat(e.message)), this.onEnd.reject(e), e;
+                        this.debug("program ended"), this.onEnd.resolve()
+                    }
+                }, {
+                    key: "evaluate",
+                    value: function(e) {
+                        try {
+                            return this.context.evaluate(e)
+                        } catch (t) {
+                            throw console.error("Error evaluating code:", e), t
+                        }
+                    }
+                }, {
+                    key: "set",
+                    value: function(e, t) {
+                        this.variables[e] = t
+                    }
+                }, {
+                    key: "setArray",
+                    value: function(e, t, n) {
+                        this.variables[e][t] = n
+                    }
+                }, {
+                    key: "array",
+                    value: function(e) {
+                        this.variables[e] = {}
+                    }
+                }, {
+                    key: "fun",
+                    value: function(e) {
+                        switch (s[e] || this.end(new Error("Function ".concat(e, " does not exist"))), e.toLowerCase()) {
+                            case "color":
+                                return this.color.bind(this);
+                            case "getchar":
+                                return this.getChar.bind(this)
+                        }
+                        return s[e]
+                    }
+                }, {
+                    key: "get",
+                    value: function(e) {
+                        return this.variables[e] || 0
+                    }
+                }, {
+                    key: "getConst",
+                    value: function(e) {
+                        if (this.constants.hasOwnProperty(e)) return this.constants[e];
+                        this.end(new Error("Constant ".concat(e, " undefined")))
+                    }
+                }, {
+                    key: "pause",
+                    value: function(e) {
+                        this.debug("pause ".concat(e)), this.delay = e
+                    }
+                }, {
+                    key: "goto",
+                    value: function(e) {
+                        this.debug("goto ".concat(e)), this.lineno = e, this.jumped = !0
+                    }
+                }, {
+                    key: "loopStart",
+                    value: function(e) {
+                        var t = e.variable,
+                            n = e.value,
+                            r = e.increment,
+                            i = e.max;
+                        this.debug("marking loop ".concat(t)), this.set(t, n);
+                        var o = this.getNextLine();
+                        if (!o) return this.end();
+                        this.loops[t] = {
+                            variable: t,
+                            value: n,
+                            increment: r,
+                            max: i,
+                            lineno: o.lineno
+                        }
+                    }
+                }, {
+                    key: "loopJump",
+                    value: function(e) {
+                        this.debug("jumping to loop ".concat(e));
+                        var t = this.loops[e];
+                        t.value += t.increment, this.set(t.variable, t.value), t.value >= t.max || this.goto(t.lineno)
+                    }
+                }, {
+                    key: "gosub",
+                    value: function(e) {
+                        var t = this.getNextLine();
+                        t ? this.stack.push(t.lineno) : this.stack.push(this.lineno + 1), this.goto(e)
+                    }
+                }, {
+                    key: "return",
+                    value: function() {
+                        0 === this.stack.length && this.end(new Error("No function calls to return from"));
+                        var e = this.stack.pop();
+                        this.goto(e)
+                    }
+                }, {
+                    key: "assertDisplay",
+                    value: function() {
+                        this.display || this.end(new Error("No display found"))
+                    }
+                }, {
+                    key: "plot",
+                    value: function(e, t, n) {
+                        this.assertDisplay(), this.display.plot(e, t, n)
+                    }
+                }, {
+                    key: "color",
+                    value: function(e, t) {
+                        return this.assertDisplay(), this.display.color(e, t)
+                    }
+                }, {
+                    key: "clearAll",
+                    value: function() {
+                        this.clearConsole(), this.clearGraphics()
+                    }
+                }, {
+                    key: "print",
+                    value: function(e) {
+                        this.console.log(e.toString())
+                    }
+                }, {
+                    key: "clearConsole",
+                    value: function() {
+                        this.console.clear()
+                    }
+                }, {
+                    key: "clearGraphics",
+                    value: function() {
+                        this.assertDisplay(), this.display.clear()
+                    }
+                }, {
+                    key: "getChar",
+                    value: function() {
+                        return this.assertDisplay(), this.display.getChar() || ""
+                    }
+                }, {
+                    key: "input",
+                    value: function(e) {
+                        this.console.input(e)
+                    }
+                }, {
+                    key: "halt",
+                    value: function() {
+                        this.halted = !0
+                    }
+                }]) && r(t.prototype, n), e
+            }());
+        t.exports = c
+    }, {
+        "context-eval": "node_modules/context-eval/lib/context-browser.js",
+        "./parser": "parser.js",
+        "./functions": "functions.js",
+        "./errors": "errors.js"
+    }],
+    "../../home/runner/bundle-repl/node_modules/process/browser.js": [function(e, t, n) {
+        var r, i, o = t.exports = {};
 
-function Item(fun, array) {
-  this.fun = fun;
-  this.array = array;
-}
+        function s() {
+            throw new Error("setTimeout has not been defined")
+        }
 
-Item.prototype.run = function () {
-  this.fun.apply(null, this.array);
+        function u() {
+            throw new Error("clearTimeout has not been defined")
+        }
+
+        function a(e) {
+            if (r === setTimeout) return setTimeout(e, 0);
+            if ((r === s || !r) && setTimeout) return r = setTimeout, setTimeout(e, 0);
+            try {
+                return r(e, 0)
+            } catch (t) {
+                try {
+                    return r.call(null, e, 0)
+                } catch (t) {
+                    return r.call(this, e, 0)
+                }
+            }
+        }! function() {
+            try {
+                r = "function" == typeof setTimeout ? setTimeout : s
+            } catch (e) {
+                r = s
+            }
+            try {
+                i = "function" == typeof clearTimeout ? clearTimeout : u
+            } catch (e) {
+                i = u
+            }
+        }();
+        var c, l = [],
+            h = !1,
+            f = -1;
+
+        function p() {
+            h && c && (h = !1, c.length ? l = c.concat(l) : f = -1, l.length && v())
+        }
+
+        function v() {
+            if (!h) {
+                var e = a(p);
+                h = !0;
+                for (var t = l.length; t;) {
+                    for (c = l, l = []; ++f < t;) c && c[f].run();
+                    f = -1, t = l.length
+                }
+                c = null, h = !1,
+                    function(e) {
+                        if (i === clearTimeout) return clearTimeout(e);
+                        if ((i === u || !i) && clearTimeout) return i = clearTimeout, clearTimeout(e);
+                        try {
+                            i(e)
+                        } catch (t) {
+                            try {
+                                return i.call(null, e)
+                            } catch (t) {
+                                return i.call(this, e)
+                            }
+                        }
+                    }(e)
+            }
+        }
+
+        function y(e, t) {
+            this.fun = e, this.array = t
+        }
+
+        function m() {}
+        o.nextTick = function(e) {
+            var t = new Array(arguments.length - 1);
+            if (arguments.length > 1)
+                for (var n = 1; n < arguments.length; n++) t[n - 1] = arguments[n];
+            l.push(new y(e, t)), 1 !== l.length || h || a(v)
+        }, y.prototype.run = function() {
+            this.fun.apply(null, this.array)
+        }, o.title = "browser", o.env = {}, o.argv = [], o.version = "", o.versions = {}, o.on = m, o.addListener = m, o.once = m, o.off = m, o.removeListener = m, o.removeAllListeners = m, o.emit = m, o.prependListener = m, o.prependOnceListener = m, o.listeners = function(e) {
+            return []
+        }, o.binding = function(e) {
+            throw new Error("process.binding is not supported")
+        }, o.cwd = function() {
+            return "/"
+        }, o.chdir = function(e) {
+            throw new Error("process.chdir is not supported")
+        }, o.umask = function() {
+            return 0
+        }
+    }, {}],
+    "index.js": [function(e, t, n) {
+        e("process"), window.Basic = e("./basic")
+    }, {
+        "./basic": "basic.js",
+        process: "../../home/runner/bundle-repl/node_modules/process/browser.js"
+    }]
+}, {}, ["index.js"]), window.Basic.interpret_only_result = function(e) {
+    return new Promise((t, n) => {
+        new Basic({
+            console: console,
+            debugLevel: 99
+        }).run(e), logger.getLogs().forEach(function(e) {
+            var n = e[0];
+            1 == e.length && n.replace(/\s/g, "").length && (t(e), logger.clear())
+        })
+    })
 };
-
-process.title = 'browser';
-process.env = {};
-process.argv = [];
-process.version = ''; // empty string to avoid regexp issues
-
-process.versions = {};
-
-function noop() {}
-
-process.on = noop;
-process.addListener = noop;
-process.once = noop;
-process.off = noop;
-process.removeListener = noop;
-process.removeAllListeners = noop;
-process.emit = noop;
-process.prependListener = noop;
-process.prependOnceListener = noop;
-
-process.listeners = function (name) {
-  return [];
-};
-
-process.binding = function (name) {
-  throw new Error('process.binding is not supported');
-};
-
-process.cwd = function () {
-  return '/';
-};
-
-process.chdir = function (dir) {
-  throw new Error('process.chdir is not supported');
-};
-
-process.umask = function () {
-  return 0;
-};
-},{}],"index.js":[function(require,module,exports) {
-var process = require("process");
-window.Basic = require('./basic');
-
-var colors = {};
-var keyQueue = ['a', 'b', 'c'];
-var display = {
-  plot: function plot(x, y, color) {
-    console.log('plotting', x, y, color);
-    colors["".concat(x).concat(y)] = color;
-  },
-  color: function color(x, y) {
-    return colors["".concat(x).concat(y)];
-  },
-  clear: function clear() {
-    console.log('display cleared');
-  },
-  getChar: function getChar() {
-    return keyQueue.pop();
-  }
-};
-var cnsle = {
-  write: function write(s) {
-    return console.log(s);
-  },
-  clear: function clear() {
-    return console.log('console cleared');
-  },
-  input: function input(callback) {
-    setTimeout(function () {
-      return callback('foo');
-    });
-  }
-};
-},{"./basic":"basic.js","process":"../../home/runner/bundle-repl/node_modules/process/browser.js"}]},{},["index.js"], "pg-basic")
