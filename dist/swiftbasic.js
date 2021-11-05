@@ -1,3 +1,19 @@
+var logger = {};
+console.defaultLog = console.log.bind(console);
+console.logs = [];
+console.log = function(){
+    // default &  console.log()
+    console.defaultLog.apply(console, arguments);
+    // new & array data
+    console.logs.push(Array.from(arguments));
+}
+logger.getLogs=function(){
+  return console.logs;
+}
+logger.clear=function(){
+  console.logs=[];
+}
+
 parcelRequire = function(e, t, n, r) {
     var i, o = "function" == typeof parcelRequire && parcelRequire,
         s = "function" == typeof require && require;
