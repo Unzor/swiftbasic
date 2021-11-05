@@ -11,7 +11,7 @@ interpreter.run(`10 PRINT "HELLO WORLD"`);
 ```
 Getting result:
 ```javascript
-Basic.interpret_only_result('10 PRINT "Hello World!"').then(function(a){
+Basic.interpret_only_result(`10 PRINT "Hello World!"`).then(function(a){
 alert(a);
 })
 ```
